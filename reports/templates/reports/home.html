@@ -1,0 +1,17 @@
+{% extends "reports/base.html" %}
+{% block content %}
+    <div class="container">
+        <div style="text-align:center; width:100%">
+            <form method="post">
+                {% csrf_token %}
+                <h2>Find out how much you can build!</h2><br>
+                {{ form.as_p }}
+                <br>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        {% if address_proper %}
+            {% include "reports/report_tier_1.html" %}
+        {% endif %}
+    </div>
+{% endblock content %}

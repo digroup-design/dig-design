@@ -1,0 +1,117 @@
+<div>
+    <table style="width:100%">
+        <tr>
+            <th colspan="2" style="text-align:center"><h4>Overview</h4></th>
+        </tr>
+        <tr>
+            <td align="right"><b>Address: </b></td>
+            <td>{{ address_proper }}<br>{{ city_zip }}</td>
+        </tr>
+        <tr>
+            <td align="right"><b>APN: </b></td>
+            <td>{{ apn }}</td>
+        </tr>
+        <tr>
+            <td align="right"><b>Zone: </b></td>
+            <td>{{ zone }}</td>
+        </tr>
+        <tr>
+            <td align="right"><b>Lot Size: </b></td>
+            <td>{{ area }} SF</td>
+        </tr>
+        <tr>
+            <td align="right"><b>Transit Priority Area: </b></td>
+            <td>{{ transit_priority }}</td>
+        </tr>
+    </table>
+</div><br>
+<div>{% if max_du %}
+    <table style="width:100%">
+        <tr>
+            <th colspan="2" style="text-align:center"><h4>Maximum Dwelling Units</h4></th>
+        </tr>
+        <tr>
+            <td align="right"><b>Base Dwelling Units: </b></td>
+            <td>{{ max_du_calc }}<b>{{ max_du }}</b></td>
+        </tr>{% if incentives_vl %}
+        <tr>
+            <th colspan="2" style="text-align:center"><i>Affordable Housing: </i></th>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align:center">
+                <table style="text-align:center; width:100%">
+                    <tr>
+                        <th>Household Income</th>
+                        <th>Market-Price Units</th>
+                        <th>Affordable Units</th>
+                        <th>Incentives</th>
+                    </tr>
+                    <tr>
+                        <td><b>Very Low</b></td>
+                        <td>{{ units_mp_vl }}</td>
+                        <td>{{ units_aff_vl }}</td>
+                        <td>{{ incentives_vl }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Low</b></td>
+                        <td>{{ units_mp_l }}</td>
+                        <td>{{ units_aff_l }}</td>
+                        <td>{{ incentives_l }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Moderate</b></td>
+                        <td>{{ units_mp_m }}</td>
+                        <td>{{ units_aff_m }}</td>
+                        <td>{{ incentives_m }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td><br></td>
+        </tr>
+        <tr>
+            <td align="right"><b>Maximum Dwelling Units: </b></td>
+            <td>{{ max_total_units }}</td>
+        </tr>{% else %}
+        <tr>
+            <th>Not eligible for affordable bonus</th>
+        </tr>{% endif %}
+    </table>{% else %}
+    <p><b>Dwelling Unit calculations currently unavailable</b></p>
+    {% endif %}
+</div>
+<br>
+<div>
+    {% if rule_dict %}
+    <table style="width:100%">
+        <tr>
+            <th style="text-align:center" colspan="2"><h3>Regulations for Zone {{ zone }}</h3></th>
+        </tr>
+        <tr>
+            {% for k, v in rule_dict.items %}
+            <td style="vertical-align:top">
+                <table>
+                    <tr>
+                        <td colspan="2"><u><b>{{ k }}</b></u></td> {# prints out rule's class #}
+                    </tr>
+                    {% for k2, v2 in v.items %}
+                    <tr>
+                        <td colspan="2"><b>{{ k2 }}</b></td>
+                    </tr>
+                    {% for k3, v3 in v2.items %}
+                    <tr>
+                        <td>{{ k3 }}</td>
+                        <td>{{ v3 }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+                </table>
+            </td>
+            {% endfor %}
+        </tr>
+    </table>
+    {% else %}
+    <p><b>Data for Zone {{ zone }} currently unavailable.</b></p>
+    {% endif %}
+</div>

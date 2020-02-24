@@ -1,0 +1,12 @@
+venv
+.idea
+*.xlsm
+*.xlsx
+*.geojson
+*/data
+*.zip
+*.rar
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
