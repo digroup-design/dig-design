@@ -34,32 +34,9 @@ def break_file(folder, filename):
 
 #break_file('San Diego', 'Parcels.geojson')
 
-def build_address_book(folder, filename):
-    filedir = _get_geojson_dir(folder, filename)
-    file = open(filedir, 'r')
+from django.db import models
 
-    address_book = open('addresses.txt', 'w')
-    for line in file:
-        if ENTRY_SUBSTRING.lower() in line.lower():
-            feature = json.loads(line.strip().rstrip(','))
-            properties = feature['properties']
-            address_num = str(int(properties['ADDRNMBR']))
-            street = properties['ADDRNAME']
-            suffix = properties['ADDRSFX']
+def geojson_to_model():
+    pass
 
-            if street is not None:
-                street = street.title()
-            if suffix is not None:
-                suffix = suffix.title()
 
-            address_full = ' '.join(filter(None, [address_num, street, suffix]))
-            print(address_full)
-            address_book.write(address_full+'\n')
-
-    for f in file, address_book:
-        f.close()
-
-#build_address_book('San Diego', 'Address_APN.geojson')
-
-import sqlite3
-print(sqlite3.sqlite_version)

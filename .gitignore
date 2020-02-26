@@ -4,6 +4,8 @@ venv
 *.xlsx
 *.geojson
 */data
+*rootkey.csv
+logs.txt
 *.zip
 *.rar
 # Elastic Beanstalk Files

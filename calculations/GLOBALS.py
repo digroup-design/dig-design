@@ -3,8 +3,12 @@ import boto3
 #global constants
 AWS = True #flip this on or off
 BUCKET = 'dig-geojson'
-AWS_ACCESS_KEY_ID = 'AKIAIWFMABW23KNOQKHA'
-AWS_SECRET_ACCESS_KEY = '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'
+
+#rootkey.csv must not be included in Github for AWS security reasons. Can be downloaded from AWS.
+rootkey = open('rootkey.csv', 'r').readlines()
+
+AWS_ACCESS_KEY_ID = (rootkey[0].split("="))[1].strip()
+AWS_SECRET_ACCESS_KEY = (rootkey[1].split("="))[1].strip()
 
 def get_s3_file(key, bucket=BUCKET, encoding='utf-8'):
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, \
