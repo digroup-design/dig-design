@@ -1,4 +1,4 @@
-import os
+import os.path as path
 import operator
 import simplejson as json
 from shapely.geometry import Polygon, MultiPolygon, mapping, shape
@@ -19,14 +19,8 @@ class GisDB:
         db_dict[self.name] = self
 
     def _get_geojson(self, filename):
-        if GLOBALS.AWS:
-            bucket = 'dig-geojson'
-            key = 'static/data/{0}/geojson/{1}.geojson'.format(self.name, filename)
-            return GLOBALS.get_s3_file(key, bucket)
-        else:
-            parent_dir = os.path.abspath(os.getcwd())
-            # return parent_dir + "\\data\\{0}\\geojson\\{1}.geojson".format(self.name, filename)
-            return open(parent_dir + "\\calculations\\data\\{0}\\geojson\\{1}.geojson".format(self.name, filename), 'r')
+        filename = '{0}/geojson/{1}.geojson'.format(self.name, filename)
+        return GLOBALS.get_file(filename)
 
     def get_feature(self, geojson, *lookup, concat=False):
         if len(lookup) % 2 != 0:

@@ -7,30 +7,19 @@ except ModuleNotFoundError:
     import TxtConverter
     import GLOBALS
 import math
-import os
 
 #takes filename (txt) and adds its entries to tree's nodes
 #each row represents a zoning code and each column the specific regulations
 #transpose is True if the above is reversed
-def txt_to_tree(filename, tree, transpose=False):
-    if GLOBALS.AWS:
-        file = GLOBALS.get_s3_file(filename, encoding='windows-1252')
-    else:
-        file = open(filename, 'r')
-    try:
-        data_array = TxtConverter.txt_to_array(file, transpose, char_strip=['"'])
-        rule_names = data_array[0]
-        rule_class = ((filename.split("-")[0]).split("\\")[-1]).split(".")[0]
-        rule_class = ((rule_class.split("-")[0]).split("/")[-1]).split(".")[0]
+def txt_to_tree(file, tree, rule_class='', transpose=False):
+    data_array = TxtConverter.txt_to_array(file, transpose, char_strip=['"'])
+    rule_names = data_array[0]
 
-        for r in range(1, len(data_array)):
-            entry = data_array[r]
-            node_name = entry[0]
-            dictionary = TxtConverter.rules_to_dictionary(rule_names, entry, rule_class)
-            tree.update_node(node_name, dictionary)
-    except PermissionError:
-        #Probably tried to open a folder as file
-        pass
+    for r in range(1, len(data_array)):
+        entry = data_array[r]
+        node_name = entry[0]
+        dictionary = TxtConverter.rules_to_dictionary(rule_names, entry, rule_class)
+        tree.update_node(node_name, dictionary)
     return tree
 
 #Calculator is to be used as an abstract class for all Calculators. All methods are tested to work
@@ -46,21 +35,14 @@ class Calculator:
 
     def _build_tree(self):
         #default implementation builds San Diego Tree
+        file_dir = 'San Diego/zones/'
         tree = CodeTree.CodeTree(self.name)
-        if GLOBALS.AWS:
-            parent_dir = 'static/data/San Diego/zones'
-            for file in GLOBALS.get_s3_file_list(parent_dir):
-                if '.txt' in file:
-                    print(file)
-                    txt_to_tree(file, tree, transpose=True)
-        else:
-            parent_dir = os.path.abspath(os.getcwd()) + "/calculations"
-            sd_dir = parent_dir + "/data/{0}/".format(self.name)
-            #TODO: convert this for s3 use
-            file_list = [f for f in os.listdir(sd_dir) if ('.txt' in f)]
-            for file in file_list:
-                print(file)
-                txt_to_tree(sd_dir + file, tree, transpose=True)
+        file_list = [f for f in GLOBALS.get_file_list(file_dir) if ('.txt' in f)]
+        for filename in file_list:
+            rule_class = ((filename.split("-")[0]).split("\\")[-1]).split(".")[0]
+            rule_class = ((rule_class.split("-")[0]).split("/")[-1]).split(".")[0]
+            file = GLOBALS.get_file(filename)
+            txt_to_tree(file, tree, rule_class=rule_class, transpose=True)
         return tree
 
     # default implementation assumes hyphen in code names determine hierarchy
@@ -103,13 +85,7 @@ class Calculator:
     def _build_low_income(self):
         low_income_dict = {}
         try:
-            if GLOBALS.AWS:
-                file_path = 'static/data/{0}/etc/Low Income.txt'.format(self.name)
-                file = GLOBALS.get_s3_file(file_path)
-            else:
-                parent_dir = os.path.abspath(os.getcwd())
-                file_path = parent_dir + "/calculations/data/{0}/etc/Low Income.txt".format(self.name)
-                file = open(file_path, 'r')
+            file = GLOBALS.get_file("{0}/etc/Low Income.txt".format(self.name))
             info_array = TxtConverter.txt_to_array(file, char_strip=["\""])
             for i in range(1, len(info_array)): #skips the first row, header
                 entry = info_array[i]
