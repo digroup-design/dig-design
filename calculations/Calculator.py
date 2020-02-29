@@ -1,11 +1,6 @@
-try:
-    import calculations.CodeTree as CodeTree
-    import calculations.TxtConverter as TxtConverter
-    import calculations.GLOBALS as GLOBALS
-except ModuleNotFoundError:
-    import CodeTree
-    import TxtConverter
-    import GLOBALS
+import calculations.CodeTree as CodeTree
+import calculations.TxtConverter as TxtConverter
+import calculations.GLOBALS as GLOBALS
 import math
 
 #takes filename (txt) and adds its entries to tree's nodes

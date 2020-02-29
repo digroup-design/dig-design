@@ -3,7 +3,7 @@ import os
 import os.path as path
 
 #global constants
-AWS = False #flip this on or off
+AWS = True #flip this on or off
 BUCKET = 'dig-geojson'
 
 #rootkey.csv must not be included in Github for AWS security reasons. Can be downloaded from AWS.

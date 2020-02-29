@@ -1,11 +1,7 @@
-import os.path as path
 import operator
 import simplejson as json
 from shapely.geometry import Polygon, MultiPolygon, mapping, shape
-try:
-    import calculations.GLOBALS as GLOBALS
-except ModuleNotFoundError:
-    import GLOBALS
+import calculations.GLOBALS as GLOBALS
 
 db_dict = {}
 ENTRY_SUBSTRING = '"type": "Feature"'
@@ -125,7 +121,7 @@ class GisDB:
         else:
             return [k for k in zones_dict_2.keys()]
 
-    #returns true if lot_geometry interesects with any of the polygons in geojson
+    #returns true if lot_geometry intersects with any of the polygons in geojson
     def intersects_zone(self, geojson, lot_geometry):
         lot_polygon = shape(lot_geometry)
         file = self._get_geojson(geojson)

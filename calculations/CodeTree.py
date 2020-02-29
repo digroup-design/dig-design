@@ -1,7 +1,4 @@
-try:
-    import calculations.TxtConverter as TxtConverter
-except ModuleNotFoundError:
-    import TxtConverter
+import calculations.TxtConverter as TxtConverter
 
 # Notes:
 # When instantiated and called outside the terminal, nodes should only have to be referred to by their names "e.g. RM-1-1"
@@ -121,7 +118,6 @@ class CodeTree:
                 v['value'] +  foot_text
 
         return output_dict
-
 
     def rule_to_value(self, node_name, rule, substr=True):
         return self.get_attr_by_rule(node_name, rule, 'value', substr)

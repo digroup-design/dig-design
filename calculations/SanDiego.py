@@ -1,9 +1,6 @@
-try:
-    import calculations.Calculator as Calculator
-    import calculations.GISReader as GISReader
-except ModuleNotFoundError:
-    import Calculator
-    import GISReader
+import calculations.Calculator as Calculator
+import calculations.GISReader as GISReader
+
 
 class CalculatorSanDiego(Calculator.Calculator):
     #all implementations in Calculator class designed to work by default for San Diego

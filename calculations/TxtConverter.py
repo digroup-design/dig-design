@@ -2,13 +2,10 @@ import numpy
 # This module handles all the conversions of txt to arrays that will be read by the CodeTree
 
 # inputs:
-# text file to be iterated
+# text - an opened file to be translated into the tree
 # transpose - if True, converts rows to columns and vice versa
 # char_strip - remove any characters within this array
 def txt_to_array(text, transpose=False, char_strip=[]):
-    # TODO: need to look at errors argument here, see why decode issue arises
-    # text = open(txt_file, "r", errors="ignore")
-    # rows = text.readlines()
     array = []
     for r in text:
         row_split = r.split('\t')

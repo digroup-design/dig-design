@@ -7,9 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
 """
 import os
-
 from django.core.wsgi import get_wsgi_application
-print ('IMPORTING', __name__, 'from', __file__, 'in', os.getpid())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
 
 application = get_wsgi_application()
