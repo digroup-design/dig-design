@@ -1,4 +1,8 @@
 from django.db import models
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
+#django.setup()
 
 class Address(models.Model):
     number = models.CharField(max_length=10)
@@ -12,8 +16,7 @@ class Address(models.Model):
     parcel_id = models.CharField(max_length=10, null=True)
 
     def __str__(self):
-        join_str = [str(self.number), str(self.street_name), str(self.street_sfx), str(self.unit)]
-        join_str = [s for s in join_str if s is not None]
+        join_str = [str(s) for s in [self.number, self.street_name, self.street_sfx, self.unit] if s is not None]
         return ' '.join(join_str)
 
     class Meta:
@@ -32,7 +35,7 @@ class Parcel(models.Model):
         abstract = True
 
 class Zone(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=50)
     geometry = models.TextField()
 
     def __str__(self):
@@ -72,3 +75,5 @@ class SanDiego_Parcel(Parcel):
 class SanDiego_Zone(Zone):
     imp_date = models.CharField(max_length=20, null=True)
 
+class SanDiego_TransitArea(Zone):
+    pass

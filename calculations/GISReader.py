@@ -1,134 +1,98 @@
-import operator
-import simplejson as json
 from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 import calculations.GLOBALS as GLOBALS
-
-db_dict = {}
-ENTRY_SUBSTRING = '"type": "Feature"'
-
-def geometry_to_polygon(geometry):
-    return shape(geometry)
+import simplejson as json
+from django.db.models.functions import Concat, Replace
+from django.db.models import Value as V
+import dig.models as models
 
 class GisDB:
     def __init__(self, name):
         self.name = name
-        db_dict[self.name] = self
+        GLOBALS.db_dict[self.name] = self
+        self._init_models()
 
-    def _get_geojson(self, filename):
-        filename = '{0}/geojson/{1}.geojson'.format(self.name, filename)
-        return GLOBALS.get_file(filename)
+    def _init_models(self):
+        self.zone_model = models.Zone
+        self.address_model = models.Address
+        self.parcel_model = models.Parcel
 
-    def get_feature(self, geojson, *lookup, concat=False):
-        if len(lookup) % 2 != 0:
-            print("Lookup arguments must be in pairs (lookup_type, lookup_value).",\
-                  "If concat is True, lookup_value can simply be '' for later outputs")
-            return None
+    def get_address_feature(self, street_str, address_model=None):
+        if address_model is None:
+            address_model = self.address_model
+        full_address = Replace(Concat('number', V(' '), 'street_name', V(' '), 'street_sfx'), V('  '), V(' '))
+        address_set = address_model.objects.annotate(full_address=full_address)
+        return address_set.get(full_address__iexact=street_str)
 
-        return_feature = None
-        file = self._get_geojson(geojson)
-        for line in file:
-            if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
-                feature = json.loads(line.strip().rstrip(','))
-                properties = feature['properties']
-                # iterates through all lookup parameters to ensure match
-                if concat:
-                    #this condition assumes the user is inputting an address
-                    lookup_types = []
-                    lookup_values = []
-                    for a in range(0, len(lookup), 2):
-                        lookup_types.append(lookup[a])
-                        lookup_values.append(str(lookup[a+1]))
+    def get_geometry(self, feature):
+        return json.loads(feature.geometry.replace('\'', '\"'))
 
-                    properties_values = [str(properties[t]) for t in lookup_types]
+    #input an address object
+    #returns a string tuple for address proper
+    def get_address_proper(self, address_feature):
+        first_line = ' '.join([str(s).title() for s in [address_feature.number, address_feature.street_name,
+                                                address_feature.street_sfx, address_feature.unit] if s is not None])
+        second_line = ' '.join([str(s) for s in [address_feature.city, address_feature.state,
+                                                 address_feature.zip] if s is not None])
+        return first_line, second_line
 
-                    lookup_concat = ' '.join(filter(None, lookup_values))
-                    properties_concat = (' '.join(filter(None, properties_values))).replace('.0 ', ' ')
-                    if properties_concat.upper() == lookup_concat.upper():
-                        return_feature = feature
-                else:
-                    for a in range(0, len(lookup), 2):
-                        lookup_type = lookup[a].upper()
-                        lookup_value = lookup[a + 1]
-                        if type(lookup_value) == str:
-                            lookup_value = lookup_value.upper()
+    def get_parcel_feature(self, parcel_id, parcel_model=None):
+        if parcel_model is None:
+            parcel_model = self.parcel_model
+        return parcel_model.objects.filter(parcel_id=parcel_id)[0]
 
-                        if properties[lookup_type] == lookup_value:
-                            return_feature = feature
-                        else:
-                            return_feature = None
-                            break
-                if return_feature is not None:
-                    break
-        return return_feature
+    def address_to_zone(self, street_str, address_model=None, parcel_model=None, zone_model=None):
+        if address_model is None:
+            address_model = self.address_model
+        if zone_model is None:
+            zone_model = self.zone_model
+        if parcel_model is None:
+            parcel_model = self.parcel_model
 
-    #input:
-        #geojson - filename of geojson containing the information
-        #return_type of the data to be searched - can be str or list of str
-        #lookup - paired arguments of a lookup_type and a lookup_value
-        #return - the return_type's value corresponding to the lookup
-    def get_attr(self, geojson, return_type, *lookup, concat=False):
-        feature = self.get_feature(geojson, *lookup, concat=concat)
-        if feature is None:
-            print('Lookup values not found.')
-            return None
-        else:
-            properties = feature['properties']
-            geometry = feature['geometry']
-            if isinstance(return_type, list):
-                return_value = []
-                for r in return_type:
-                    if r.lower() == "geometry":
-                        return_value.append(geometry)
-                    else:
-                        return_value.append(properties[r])
-            else:
-                if return_type == 'geometry':
-                    return_value = geometry
-                else:
-                    return_value = properties[return_type]
-            return return_value
+        address_feature = self.get_address_feature(street_str, address_model=address_model)
+        parcel_id = address_feature.parcel_id
+        print("{0} found with Parcel ID: {1}".format(address_feature, parcel_id))
+        parcel_feature = self.get_parcel_feature(parcel_id, parcel_model=parcel_model)
+        parcel_geometry = self.get_geometry(parcel_feature)
+        return self.get_zone(parcel_geometry, zone_model=zone_model)
 
-    #returns a dictionary of zones along with the area
-    def get_zones_dict(self, geojson, lot_geometry, zone_label = "ZONE_NAME"):
-        zones_dict = {}
-        lot_polygon = shape(lot_geometry)
-        file = self._get_geojson(geojson)
-        for line in file:
-            if ENTRY_SUBSTRING.lower() in line.lower(): #checks if line in geojson is a Feature entry
-                feature = json.loads(line.strip().rstrip(','))
-                geometry = feature['geometry']
-                zone_polygon = shape(geometry)
-                if lot_polygon.intersects(zone_polygon):
-                    intersection_area = lot_polygon.intersection(zone_polygon).area
-                    zone = feature['properties'][zone_label]
-                    if zone in zones_dict.keys():
-                        zones_dict[zone] += intersection_area
-                    else:
-                        zones_dict[zone] = intersection_area
-        return zones_dict
 
     #if one_zone, return only a single string representing the zone that covers the most area
     #if one_zone is false, returns a list of strings representing the zones
-    def get_zone(self, geojson, lot_geometry, zone_label="ZONE_NAME", one_zone=True, threshold = 0.01):
-        zones_dict = self.get_zones_dict(geojson, lot_geometry, zone_label)
-        total_area = sum(zones_dict.values())
-        zones_dict_2 = {} #new dictionary to be copied into
-        for k in zones_dict.keys():
-            if zones_dict[k]/total_area >= threshold:
-                zones_dict_2[k] = zones_dict[k]
-        if one_zone:
-            return max(zones_dict_2.items(), key=operator.itemgetter(1))[0]
+    def get_zone(self, parcel_feature, one_zone=True, threshold=0.01, zone_model=None):
+        if zone_model is None:
+            zone_model = self.zone_model
+        lot_polygon = shape(self.get_geometry(parcel_feature))
+        zone_dict = {}
+        for z in zone_model.objects.all():
+            zone_polygon = shape(self.get_geometry(z))
+            if zone_polygon.intersects(lot_polygon):
+                if z.name not in zone_dict.keys():
+                    zone_dict[z.name] = 0
+                zone_dict[z.name] += zone_polygon.intersection(lot_polygon).area
+        if zone_dict == {}:
+            print("No zone found")
+            return None
         else:
-            return [k for k in zones_dict_2.keys()]
+            if one_zone:
+                max_zone = None
+                max_area = 0
+                for k, v in zone_dict.items():
+                    if v > max_area:
+                        max_zone = k
+                        max_area = v
+                return max_zone
+            else:
+                total_area = sum(zone_dict.values())
+                return [z for z in zone_dict.keys() if (zone_dict[z]/total_area >= threshold)]
 
-    #returns true if lot_geometry intersects with any of the polygons in geojson
-    def intersects_zone(self, geojson, lot_geometry):
-        lot_polygon = shape(lot_geometry)
-        file = self._get_geojson(geojson)
-        for line in file:
-            if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
-                feature = json.loads(line.strip().rstrip(','))
-                zone_polygon = shape(feature['geometry'])
-                if lot_polygon.intersects(zone_polygon):
-                    return True
+    def is_in_zone(self, parcel_feature, zone_name, zone_model=None):
+        if zone_model is None:
+            zone_model = self.zone_model
+        lot_polygon = shape(self.get_geometry(parcel_feature))
+        for z in zone_model.objects.filter(name=zone_name):
+            zone_polygon = shape(self.get_geometry(z))
+            if zone_polygon.intersects(lot_polygon):
+                return True
         return False
+
+

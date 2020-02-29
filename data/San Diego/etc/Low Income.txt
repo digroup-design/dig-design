@@ -1,0 +1,67 @@
+Household	Min %Units	%Density Bonus	Number of Incentives
+Very Low Income	5	20	1
+Very Low Income	6	22.5	1
+Very Low Income	7	25	1
+Very Low Income	8	27.5	1
+Very Low Income	9	30	1
+Very Low Income	10	32.5	2
+Low Income	11	35	2
+Low Income	12	38.75	3
+Low Income	13	42.5	4
+Low Income	14	46.25	4
+Low Income	15	50	5
+Low Income	10	20	1
+Low Income	11	21.5	1
+Low Income	12	23	1
+Low Income	13	24.5	1
+Low Income	14	26	1
+Low Income	15	27.5	1
+Low Income	16	29	1
+Low Income	17	30.5	1
+Low Income	18	32	1
+Low Income	19	33.5	1
+Low Income	20	35	2
+Low Income	21	38.75	2
+Low Income	22	42.5	2
+Low Income	23	46.25	2
+Low Income	24	50	2
+Low Income	30	50	3
+Low Income	31	50	4
+Low Income	33	50	5
+Moderate Income	10	5	1
+Moderate Income	11	6	1
+Moderate Income	12	7	1
+Moderate Income	13	8	1
+Moderate Income	14	9	1
+Moderate Income	15	10	1
+Moderate Income	16	11	1
+Moderate Income	17	12	1
+Moderate Income	18	13	1
+Moderate Income	19	14	1
+Moderate Income	20	15	2
+Moderate Income	21	16	2
+Moderate Income	22	17	2
+Moderate Income	23	18	2
+Moderate Income	24	19	2
+Moderate Income	25	20	2
+Moderate Income	26	21	2
+Moderate Income	27	22	2
+Moderate Income	31	26	4
+Moderate Income	32	27	4
+Moderate Income	33	28	5
+Moderate Income	34	29	5
+Moderate Income	35	30	5
+Moderate Income	36	31	5
+Moderate Income	37	32	5
+Moderate Income	38	33	5
+Moderate Income	39	34	5
+Moderate Income	40	35	5
+Moderate Income	41	38.75	5
+Moderate Income	42	42.5	5
+Moderate Income	43	46.25	5
+Moderate Income	44	50	5
+Very Low Income	11	35	2
+Very Low Income	12	38.75	3
+Very Low Income	13	42.5	4
+Very Low Income	14	46.25	4
+Very Low Income	15	50	5

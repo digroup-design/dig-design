@@ -1,0 +1,185 @@
+	RM-1	RM-2	RM-3	RM-4	RM-5
+Open Space\Active Recreation	P	P	P	P	P
+Open Space\Passive Recreation	P	P	P	P	P
+Open Space\Natural Resources Preservation	P	P	P	P	P
+Open Space\Park Maintenance Facilities	-	-	-	-	-
+Agriculture\Agricultural Processing	-	-	-	-	-
+Agriculture\Aquaculture Facilities	-	-	-	-	-
+Agriculture\Dairies	-	-	-	-	-
+Agriculture\Horticulture Nurseries & Greenhouses	-	-	-	-	-
+Agriculture\Raising & Harvesting of Crops	-	-	-	-	-
+"Agriculture\Raising, Maintaining & Keeping of Animals"	-	-	-	-	-
+Separately Regulated Agriculture Uses\Agricultural Equipment Repair Shops	-	-	-	-	-
+Separately Regulated Agriculture Uses\Commercial Stables	-	-	-	-	-
+Separately Regulated Agriculture Uses\Community Gardens	L	L	L	L	L
+Separately Regulated Agriculture Uses\Equestrian Show & Exhibition Facilities	-	-	-	-	-
+Separately Regulated Agriculture Uses\Open Air Markets for the Sale of Agriculture- Related Products & Flowers	-	-	-	-	-
+Residential\Mobilehome Parks	P(2)	P(2)	P(2)	P(2)	-
+Residential\Multiple Dwelling Units	P(5)	P(5)	P(5)	P(5)	P
+Residential\Rooming House [See Section 131.0112(a)(3)(A)]	P	P	P	P	P
+Residential\Shopkeeper Units	-	-	P	P	P
+Residential\Single Dwelling Units	P(12)	P(12)	P(12)	P(12)	P(12
+Separately Regulated Residential Uses\Boarder & Lodger Accommodations	L	L	L	L	L
+Separately Regulated Residential Uses\Companion Units	L	L	L	L	L
+Separately Regulated Residential Uses\Continuing Care Retirement Communities	C	C	L	L	L
+Employee Housing\6 or Fewer Employees	-	-	-	-	-
+Employee Housing\12 or Fewer Employees	-	-	-	-	-
+Employee Housing\Greater than 12 Employees	-	-	-	-	-
+"Employee Housing\Fraternities, Sororities and Student Dormitories"	C	C	C	C	-
+"Employee Housing\Garage, Yard, & Estate Sales"	L	L	L	L	-
+Employee Housing\Guest Quarters	L(10)	-	-	-	-
+Employee Housing\Home Occupations	L	L	L	L	-
+Employee Housing\Interim Ground Floor Residential	-	-	-	-	-
+Employee Housing\Junior Units	L	L	L	L	L
+Employee Housing\Live/Work Quarters	-	-	-	-	-
+Employee Housing\Permanent Supportive Housing	L	L	L	L	L
+Residential Care Facilities\6 or fewer persons	P	P	P	P	-
+Residential Care Facilities\7 or more persons	C	C	C	C	-
+Transitional Housing\6 or fewer persons	P	P	P	P	-
+Transitional Housing\7 or more persons	L	L	L	L	-
+Transitional Housing\Watchkeeper Quarters	-	-	-	-	-
+Separately Regulated Institutional Uses\Airports	-	-	-	-	-
+Separately Regulated Institutional Uses\Botanical Gardens & Arboretums	C	C	C	C	-
+"Separately Regulated Institutional Uses\Cemeteries, Mausoleums, Crematories"	-	-	-	-	-
+Separately Regulated Institutional Uses\Correctional Placement Centers	-	-	-	-	-
+Educational Facilities\Kindergarten through Grade 12	L	L	L	L	-
+Educational Facilities\Colleges / Universities	C	C	C	C	
+Educational Facilities\Vocational / Trade School	-	-	-	-	-
+Educational Facilities\Electric Vehicle Charging Stations	L	L	L	L	L
+Educational Facilities\Energy Generation & Distribution Facilities	-	-	-	C	C
+Educational Facilities\Exhibit Halls & Convention Facilities	-	-	-	-	-
+Educational Facilities\Flood Control Facilities	L	L	L	L	-
+Educational Facilities\Historical Buildings Used for Purposes Not Otherwise Allowed	C	C	C	C	C
+Homeless Facilities\Congregate Meal Facilities	-	-	C	C	-
+Homeless Facilities\Emergency Shelters	-	-	C	C	-
+Homeless Facilities\Homeless Day Centers	-	-	C	C	-
+"Homeless Facilities\Hospitals, Intermediate Care Facilities & Nursing Facilities"	C	C	C	C	-
+Homeless Facilities\Interpretive Centers	-	-	-	-	-
+Homeless Facilities\Museums	-	-	-	-	-
+"Homeless Facilities\Major Transmission, Relay, or Communications Switching Stations"	-	-	-	-	-
+Homeless Facilities\Placemaking on Private Property	L	L	L	L	L
+Homeless Facilities\Satellite Antennas	L	L	L	L	L
+Homeless Facilities\Social Service Institutions	-	-	-	-	-
+Homeless Facilities\Solar Energy Systems	L	L	L	L	L
+Homeless Facilities\Wireless Communication Facilities	See Section 141.0420				
+Retail Sales\Building Supplies & Equipment	-	-	-	-	-
+"Retail Sales\Food, Beverages and Groceries"	-	-	P(7)	P(7)	P(7)
+"Retail Sales\Consumer Goods, Furniture, Appliances, Equipment"	-	-	-	-	-
+Retail Sales\Pets & Pet Supplies	-	-	-	-	-
+"Retail Sales\Sundries, Pharmaceuticals, & Convenience Sales"	-	-	P(7)	P(7)	P(7)
+Retail Sales\Wearing Apparel & Accessories	-	-	P	P	P
+Separately Regulated Retail Sales Uses\Agriculture Related Supplies & Equipment	-	-	-	-	-
+Separately Regulated Retail Sales Uses\Alcoholic Beverage Outlets	-	-	-	-	-
+Farmers’ Markets\Weekly Farmers’Markets	-	-	-	-	-
+Farmers’ Markets\Daily Farmers’ Market Stands	-	-	-	-	-
+Farmers’ Markets\Marijuana Outlets	-	-	-	-	-
+Farmers’ Markets\Plant Nurseries	-	-	-	-	-
+Farmers’ Markets\Retail Farms	-	-	-	-	-
+Farmers’ Markets\Retail Tasting Stores	-	-	-	-	-
+Farmers’ Markets\Swap Meets & Other Large Outdoor Retail Facilities	-	-	-	-	-
+Commercial Services\Building Services	-	-	-	-	-
+Commercial Services\Business Support	-	-	P(7)	P(7)	P(7)
+Commercial Services\Eating & Drinking Establishments	-	-	-	-	-
+Commercial Services\Financial Institutions	-	-	-	-	-
+Commercial Services\Funeral & Mortuary Services	-	-	-	-	-
+Commercial Services\Instructional Studios	P	P	P	P	P
+Commercial Services\Maintenance & Repair	-	-	-	-	-
+Commercial Services\Off-Site Services	-	-	-	-	-
+Commercial Services\Personal Services	-	-	P(7)	P(7)	P(7)
+Commercial Services\Radio & Television Studios	-	-	-	-	-
+Commercial Services\Tasting Rooms	-	-	-	-	-
+Commercial Services\Visitor Accommodations	-	-	-	P(6)	P(6)
+Adult Entertainment Establishments\Adult Book Store	-	-	-	-	-
+Adult Entertainment Establishments\Adult Cabaret	-	-	-	-	-
+Adult Entertainment Establishments\Adult Drive-In Theater	-	-	-	-	-
+Adult Entertainment Establishments\Adult Mini-Motion Picture Theater	-	-	-	-	-
+Adult Entertainment Establishments\Adult Model Studio	-	-	-	-	-
+Adult Entertainment Establishments\Adult Motel	-	-	-	-	-
+Adult Entertainment Establishments\Adult Motion Picture Theater	-	-	-	-	-
+Adult Entertainment Establishments\Adult Peep Show Theater	-	-	-	-	-
+Adult Entertainment Establishments\Adult Theater	-	-	-	-	-
+Adult Entertainment Establishments\Body Painting Studio	-	-	-	-	-
+Adult Entertainment Establishments\Massage Establishment	-	-	-	-	-
+Adult Entertainment Establishments\Sexual Encounter Establishment	-	-	-	-	-
+"Adult Entertainment Establishments\Assembly and Entertainment Uses,"	L	L	L	L	L
+Bed & Breakfast Establishments\1-2 Guest Rooms	L	L	L	P	P
+Bed & Breakfast Establishments\3-5 Guest Rooms	N	N	L	P	P
+Bed & Breakfast Establishments\6+ Guest Rooms	C	N	N	P	P
+Bed & Breakfast Establishments\Boarding Kennels/ Pet Day Care	-	-	-	-	-
+Bed & Breakfast Establishments\Camping Parks	-	-	-	-	-
+Child Care Facilities\Child Care Centers	C	C	C	C	-
+Child Care Facilities\Large Family Child Care Homes	L	L	L	L	-
+Child Care Facilities\Small Family Child Care Homes	L	L	L	L	-
+Child Care Facilities\Eating and Drinking Establishments with a Drive-in or Drive-through Component	-	-	-	-	-
+Child Care Facilities\Fairgrounds	-	-	-	-	-
+"Child Care Facilities\Golf Courses, Driving Ranges, and Pitch & Putt Courses"	C	C	C	C	-
+Child Care Facilities\Helicopter Landing Facilities	-	-	-	-	-
+"Child Care Facilities\Massage Establishments, Specialized Practice"	-	-	-	-	-
+Child Care Facilities\Mobile Food Trucks	-	L(11)	L(11)	L(11)	L(11)
+"Child Care Facilities\Nightclubs & Bars over 5,000 square feet in size"	-	-	-	-	-
+Parking Facilities as a Primary Use\Permanent Parking Facilities	-	-	-	-	-
+Parking Facilities as a Primary Use\Temporary Parking Facilities	-	-	-	-	-
+"Parking Facilities as a Primary Use\Private Clubs, Lodges and Fraternal Organizations"	-	-	-	-	P
+"Parking Facilities as a Primary Use\Privately Operated, Outdoor Recreation Facilities over 40,000 square feet in size(4)"	-	-	-	-	-
+Pushcarts\Pushcarts on Private Property	-	-	-	-	-
+Pushcarts\Pushcarts in Public Right of Way	-	-	-	-	-
+Recycling Facilities\Large Collection Facility	-	-	-	-	-
+Recycling Facilities\Small Collection Facility	-	-	-	-	-
+Recycling Facilities\Large Construction & Demolition Debris Recycling Facility	-	-	-	-	-
+Recycling Facilities\Small Construction & Demolition Debris Recycling Facility	-	-	-	-	-
+Recycling Facilities\Drop-off Facility	-	-	-	-	-
+Recycling Facilities\Green Materials Composting Facility	-	-	-	-	-
+Recycling Facilities\Mixed Organic Composting Facility	-	-	-	-	-
+Recycling Facilities\Large Processing Facility Accepting at Least 98% of Total Annual Weight of Recyclables from Commercial & Industrial Traffic	-	-	-	-	-
+Recycling Facilities\Large Processing Facility Accepting All Types of Traffic	-	-	-	-	-
+Recycling Facilities\Small Processing Facility Accepting at Least 98% of Total Annual Weight of Recyclables From	-	-	-	-	-
+Commercial & Industrial Traffic\Small Processing Facility Accepting All Types of Traffic	-	-	-	-	-
+Commercial & Industrial Traffic\Reverse Vending Machines	-	-	-	-	-
+Commercial & Industrial Traffic\Tire Processing Facility	-	-	-	-	-
+Commercial & Industrial Traffic\Sidewalk Cafes	-	-	-	-	-
+Commercial & Industrial Traffic\Sports Arenas & Stadiums	-	-	-	-	-
+"Commercial & Industrial Traffic\Theaters That Are Outdoor or over 5,000 Square Feet in Size"	-	-	-	-	-
+Commercial & Industrial Traffic\Urgent Care Facility	-	-	-	-	-
+Commercial & Industrial Traffic\Veterinary Clinics & Animal Hospitals	-	-	-	-	-
+Commercial & Industrial Traffic\Zoological Parks	-	-	-	-	-
+Offices\Business & Professional	-	-	P(7)	P(7)	P(7)
+Offices\Government	-	-	-	-	-
+"Offices\Medical, Dental, & Health Practitioner"	-	-	P(7)	P(7)	P(7)
+Offices\Regional & Corporate Headquarters	-	-	-	-	-
+Separately Regulated Office Uses\Real Estate Sales Offices & Model Homes	L	L	L	L	-
+Separately Regulated Office Uses\Sex Offender Treatment & Counseling	-	-	L	L	-
+Vehicle & Vehicular Equipment Sales & Service\Commercial Vehicle Repair & Maintenance	-	-	-	-	-
+Vehicle & Vehicular Equipment Sales & Service\Commercial Vehicle Sales & Rentals	-	-	-	-	-
+Personal Vehicle Repair & Maintenance\Personal Vehicle Sales & Rentals	-				
+Personal Vehicle Repair & Maintenance\Vehicle Equipment & Supplies Sales & Rentals	-	-	-	-	-
+Separately Regulated Vehicle & Vehicular Equipment Sales & Service Uses\Automobile Service Stations	-	-	-	-	-
+"Separately Regulated Vehicle & Vehicular Equipment Sales & Service Uses\Outdoor Storage & Display of New, Unregistered Motor Vehicles as a Primary Use"	-	-	-	-	-
+Distribution and Storage\Equipment & Materials Storage Yards	-	-	-	-	-
+Distribution and Storage\Moving & Storage Facilities	-	-	-	-	-
+Distribution and Storage\Distribution Facilities	-	-	-	-	-
+Separately Regulated Distribution and Storage Uses\Impound Storage Yards	-	-	-	-	-
+Separately Regulated Distribution and Storage Uses\Junk Yards	-	-	-	-	-
+Separately Regulated Distribution and Storage Uses\Temporary Construction Storage Yards Located Off-site	N	N	N	N	-
+Industrial\Heavy Manufacturing	-	-	-	-	-
+Industrial\Light Manufacturing	-	-	-	-	-
+Industrial\Marine Industry	-	-	-	-	-
+Industrial\Research & Development	-	-	-	-	-
+Industrial\Testing Labs	-	-	-	-	-
+Industrial\Trucking & Transportation Terminals	-	-	-	-	-
+Separately Regulated Industrial Uses\Artisan Food and Beverage Producer	-	-	-	-	-
+Separately Regulated Industrial Uses\Hazardous Waste Research Facility	-	-	-	-	-
+Separately Regulated Industrial Uses\Hazardous Waste Treatment Facility	-	-	-	-	-
+Separately Regulated Industrial Uses\Marijuana Production Facilities	-	-	-	-	-
+Separately Regulated Industrial Uses\Marine Related Uses Within the Coastal Overlay Zone	-	-	-	-	-
+Separately Regulated Industrial Uses\Mining and Extractive Industries	-	-	-	-	-
+Separately Regulated Industrial Uses\Newspaper Publishing Plants	-	-	-	-	-
+Separately Regulated Industrial Uses\Processing & Packaging of Plant Products & Animal By-products Grown Off-premises	-	-	-	-	-
+Separately Regulated Industrial Uses\Very Heavy Industrial Uses	-	-	-	-	-
+Separately Regulated Industrial Uses\Wrecking & Dismantling of Motor Vehicles	-	-	-	-	-
+Signs\Allowable Signs	P	P	P	P	P
+Separately Regulated Signs Uses\Community Entry Signs	L	L	L	L	L
+Separately Regulated Signs Uses\Neighborhood Identification Signs	N	N	N	N	N
+Separately Regulated Signs Uses\Comprehensive Sign Program	-	-	-	-	-
+Separately Regulated Signs Uses\Revolving Projecting Signs	-	-	-	-	-
+Separately Regulated Signs Uses\Signs with Automatic Changing Copy	-	-	-	-	-
+Separately Regulated Signs Uses\Theater Marquees	-				

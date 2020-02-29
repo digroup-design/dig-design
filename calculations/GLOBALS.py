@@ -2,21 +2,24 @@ import boto3
 import os
 import os.path as path
 
+db_dict = {}
+
 #global constants
-AWS = True #flip this on or off
+AWS = False #flip this on or off
 BUCKET = 'dig-geojson'
 
 #rootkey.csv must not be included in Github for AWS security reasons. Can be downloaded from AWS.
-rootkey = open('rootkey.csv', 'r').readlines()
+AWS_ACCESS_KEY_ID = AWS_SECRET_ACCESS_KEY = None
+if AWS:
+    rootkey = open('rootkey.csv', 'r').readlines()
+    AWS_ACCESS_KEY_ID = (rootkey[0].split("="))[1].strip()
+    AWS_SECRET_ACCESS_KEY = (rootkey[1].split("="))[1].strip()
 
-AWS_ACCESS_KEY_ID = (rootkey[0].split("="))[1].strip()
-AWS_SECRET_ACCESS_KEY = (rootkey[1].split("="))[1].strip()
+s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 
 _default_encoding = 'windows-1252'
 _aws_parent_dir = 'static/data/'
-_local_parent_dir = path.abspath(path.join(__file__, "../../..")) + "/data/"
-
-s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+_local_parent_dir = path.abspath(path.join(__file__, "../..")) + "/data/"
 
 def _get_s3_file(key, bucket=BUCKET, encoding=_default_encoding):
     if not key.startswith(_aws_parent_dir):

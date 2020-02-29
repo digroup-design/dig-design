@@ -1,0 +1,28 @@
+	IP	IL	IH	IS	IBT
+Max permitted residential density[One dwelling unit per specified minimum square feet of lot area as determined in accordance with Section 113.0222.]	"1,000"	-	-	-	-
+Supplemental residential regulations [see Section 131. 0623(i)]	applies	-	-	-	-
+Lot Area					
+Min Lot Area (sf)	"40,000"	"15,000(Within the Kearny Mesa Community Plan area, the minimum lot size is 40,000 square feet.)"	"30,000"	"10,000"	"40,000"
+Max Lot Area (sf)	-	-	-	"15,000"	-
+Min Lot Dimensions					
+Lot Width (ft)	100	75	100	50	100
+Street Frontage (ft)	100(See Section 131.0642.)	75	100	50	100(See Section 131.0642.)
+Lot Depth (ft)	200	100	150	100	200
+Setback Requirements					
+Min Front Setback (ft) [See Section 131.0643(b)]	20(See Section 131.0643(a).)	15(See Section 131.0643(a).)	20(See Section 131.0643(a).)	10	20(See Section 131.0643(a).)
+Std Front Setback (ft) [See Section 131.0643(b)]	25(See Section 131.0643(a).)	20(See Section 131.0643(a).)	25(See Section 131.0643(a).)	10	25(See Section 131.0643(a).)
+Min Side Setback (ft)	15	10	15	5/0(See Section 131.0643(f).)	15
+Min Street Side Setback (ft)	20(See Section 131.0643(c).)	15(See Section 131.0643(c).)(See Section 131.0643(e).)	20(See Section 131.0643(c).)(See Section 131.0643(e).)	10(See Section 131.0643(g).)	20(See Section 131.0643(c).)
+Std Street Side Setback (ft)	20(See Section 131.0643(c).)	20(See Section 131.0643(c).)(See Section 131.0643(e).)	25(See Section 131.0643(c).)(See Section 131.0643(e).)	10(See Section 131.0643(g).)	20(See Section 131.0643(c).)
+Min Side Setback Abutting Residential (ft)	30	25	30	10	30
+Min Rear Setback (ft)	25	0(See Section 131.0643(d).)	20	10	25
+Std Rear Setback (ft)	25	15(See Section 131.0643(d).)	20	10	25
+Min Rear Setback Abutting Residential (ft)	50	25	30	15	50
+Max Structure Height [See Section 131.0644]	-	-	-	-	-
+Max Floor Area Ratio	"2.0(Within the Kearny Mesa Community Plan area, the maximum floor area ratio is 0.50.)(Within the Otay Mesa Community Plan area, the maximum floor area ratio is 0.50 unless a final map has been recorded prior to May 18, 2014. This restriction does not apply to residential development in accordance with Section 131.0623(i).)"	"2.0(Within the Kearny Mesa Community Plan area, the maximum floor area ratio is 0.50.)(Within the Otay Mesa Community Plan area, the maximum floor area ratio is 0.50 unless a final map has been recorded prior to May 18, 2014. This restriction does not apply to residential development in accordance with Section 131.0623(i).)"	"2.0(Within the Otay Mesa Community Plan area, the maximum floor area ratio is 0.50 unless a final map has been recorded prior to May 18, 2014. This restriction does not apply to residential development in accordance with Section 131.0623(i).)"	"2.0(Within the Otay Mesa Community Plan area, the maximum floor area ratio is 0.50 unless a final map has been recorded prior to May 18, 2014. This restriction does not apply to residential development in accordance with Section 131.0623(i).)"	"2.0(Within the Kearny Mesa Community Plan area, the maximum floor area ratio is 0.50.)(Within the Otay Mesa Community Plan area, the maximum floor area ratio is 0.50 unless a final map has been recorded prior to May 18, 2014. This restriction does not apply to residential development in accordance with Section 131.0623(i).)"
+Street Wall Requirements [See Section 142.1030]	-	applies	applies	-	-
+Outdoor Amenities [See Section 131.0665]	applies	applies	applies	-	applies
+Refuse and Recyclable Material Storage					
+[See Section 142.0805]	applies	applies	applies	applies	applies
+Loading Dock and Overhead Door Screening Regulations [See Section 142.1030]	applies	applies	applies	applies	applies
+Visibility Area [See Section 113.0273]	applies	applies	applies	applies	applies

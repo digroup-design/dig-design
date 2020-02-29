@@ -1,0 +1,26 @@
+	RT-1-1	RT-1-2	RT-1-3	RT-1-4	RT-1-5
+Maximum Permitted Density (DU per lot)	1	1	1	1	1
+Min Lot Area (sf) [See Section 131.0441]	"3,500"	"3,000"	"2,500"	"2,200"	"1,600"
+Min Lot Width (ft)	25	25	25	25	18
+Min Street Frontage (ft)	25	25	25	25	18
+Min Lot Width (corner) (ft)	25	25	25	25	25
+Min Lot Depth (ft)	100	100	90	80	80
+Min Front Setback (ft) [See Section 131.0443(c)(1)]	5	5	5	5	5
+Max Front Setback (ft) [See Section 131.0443(c)(1)]	15	15	15	15	15
+Side Setback (ft) [See Section 131.0443(c)(2)]	0	0	0	0	0
+Min Street Side Setback (ft)	5	5	5	5	5
+Min Rear Setback (ft)	3	3	3	3	3
+Max Structure Height - 1 and 2 story buildings (ft) - slab floor [See 131.0444(d)]	21	21	21	21	21
+Max Structure Height - 1 and 2 story buildings (ft) - raised floor [See 131.0444(d)]	25	25	25	25	25
+Max Structure Height - 3 story buildings (ft) - slab floor [See 131.0444(d)]	31	31	31	31	31
+Max Structure Height - 3 story buildings (ft) - raised floor [See 131.0444(d)]	35	35	35	35	35
+Max Lot Coverage (%) [See Section 131.0445(b)]	60	65	70	75	75
+Max Floor Area Ratio - 1 and 2 story buildings [See 131.0446(d)]	0.85	0.95	1	1.1	1.2
+Max Floor Area Ratio - 3 story buildings [See 131.0446(d)]	1.2	1.3	1.4	1.5	1.6
+Accessory uses and structures [See Sections 131.0448 and 141.0307]	applies	applies	applies	applies	applies
+Garage Regulations [See Section 131.0449(b)]	applies	applies	applies	applies	applies
+Parkway Requirement [See Section 131.0452]	applies	applies	applies	applies	applies
+Architectural Projections and Encroachments [See Section 131.0461(b)]	applies	applies	applies	applies	applies
+Supplemental Requirements [See Section 131.0464(c)]	applies	applies	applies	applies	applies
+Refuse and Recyclable Material Storage [See Section 142.0805]	applies	applies	applies	applies	applies
+Visibility Area [See Section 113.0273]	applies	applies	applies	applies	applies
