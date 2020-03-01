@@ -1,8 +1,7 @@
 from django.db import models
 import os
-import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
-#django.setup()
+
 
 class Address(models.Model):
     number = models.CharField(max_length=10)

@@ -40,7 +40,7 @@ import dig.models as models
 ENTRY_SUBSTRING = '"type": "Feature"'
 
 def geojson_to_zone():
-    file = open('../data/San Diego/geojson/ZONING_BASE_SD.geojson')
+    file = open('data/San Diego/geojson/ZONING_BASE_SD.geojson')
     for line in file:
         if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
             feature = json.loads(line.strip().rstrip(','))
@@ -84,7 +84,7 @@ def geojson_to_address():
             error_log.close()
     else:
         print("Done. No errors found.")
-geojson_to_address()
+#geojson_to_address()
 
 def geojson_to_parcel():
     file_dir = '../data/San Diego/geojson/Parcels.geojson'
@@ -134,3 +134,28 @@ def geojson_to_parcel():
     print('Done!')
 
 #models.SanDiego_Zone.objects.all().delete()
+
+def geojson_to_transit():
+    file_dir = 'data/San Diego/geojson/TRANSIT_PRIORITY_AREA.geojson'
+    num_lines = sum(1 for i in open(file_dir, 'rb'))
+    i = 0
+    error_log = open('Transit_log.txt', 'w')
+    file = open(file_dir, 'r')
+    for line in file:
+        if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
+            feature = json.loads(line.strip().rstrip(','))
+            name = feature['properties']['NAME']
+            geometry = feature['geometry']
+            model = models.SanDiego_TransitArea(name=name, geometry=geometry)
+            i += 1
+            progress = '{0}/{1}'.format(str(i), str(num_lines))
+            try:
+                model.save()
+                print('{0}: {1}'.format(progress, model))
+            except:
+                error_log.write(line.strip() + '\n')
+                print('{0}: {1} -- Error found!'.format(progress, model))
+    file.close()
+    error_log.close()
+    print('Done!')
+geojson_to_transit()

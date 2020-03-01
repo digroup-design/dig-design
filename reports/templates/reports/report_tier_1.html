@@ -13,15 +13,15 @@
         </tr>
         <tr>
             <td align="right"><b>Zone: </b></td>
-            <td>{{ zone }}</td>
+            <td>{% if zone %}{{ zone }}{% else %}Zone not found{% endif %}</td>
         </tr>
         <tr>
             <td align="right"><b>Lot Size: </b></td>
-            <td>{{ area }} SF</td>
+            <td>{% if area %}{{ area }} SF{% else %}Parcel data not found{% endif %}</td>
         </tr>
         <tr>
             <td align="right"><b>Transit Priority Area: </b></td>
-            <td>{{ transit_priority }}</td>
+            <td>{% if area %}{{ transit_priority }}{% else %}Parcel data not found{% endif %}</td>
         </tr>
     </table>
 </div><br>
@@ -112,6 +112,6 @@
         </tr>
     </table>
     {% else %}
-    <p><b>Data for Zone {{ zone }} currently unavailable.</b></p>
+    <p><b>Zone data currently unavailable.</b></p>
     {% endif %}
 </div>

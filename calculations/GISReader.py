@@ -21,7 +21,11 @@ class GisDB:
             address_model = self.address_model
         full_address = Replace(Concat('number', V(' '), 'street_name', V(' '), 'street_sfx'), V('  '), V(' '))
         address_set = address_model.objects.annotate(full_address=full_address)
-        return address_set.get(full_address__iexact=street_str)
+        query = address_set.filter(full_address__iexact=street_str)
+        if len(query) > 0:
+            return query[0]
+        else:
+            return None
 
     def get_geometry(self, feature):
         return json.loads(feature.geometry.replace('\'', '\"'))
@@ -30,15 +34,19 @@ class GisDB:
     #returns a string tuple for address proper
     def get_address_proper(self, address_feature):
         first_line = ' '.join([str(s).title() for s in [address_feature.number, address_feature.street_name,
-                                                address_feature.street_sfx, address_feature.unit] if s is not None])
-        second_line = ' '.join([str(s) for s in [address_feature.city, address_feature.state,
-                                                 address_feature.zip] if s is not None])
+                                                        address_feature.street_sfx, address_feature.unit] if s is not None])
+        second_line = ' '.join([s for s in [address_feature.city, address_feature.state,
+                                            address_feature.zip] if s is not None])
         return first_line, second_line
 
     def get_parcel_feature(self, parcel_id, parcel_model=None):
         if parcel_model is None:
             parcel_model = self.parcel_model
-        return parcel_model.objects.filter(parcel_id=parcel_id)[0]
+        query = parcel_model.objects.filter(parcel_id=parcel_id)
+        if len(query) > 0:
+            return query[0]
+        else:
+            return None
 
     def address_to_zone(self, street_str, address_model=None, parcel_model=None, zone_model=None):
         if address_model is None:
