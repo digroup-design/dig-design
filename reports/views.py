@@ -3,7 +3,9 @@ from django.shortcuts import render
 import calculations.SanDiego as SanDiego
 import math
 
-# Create your views here.
+san_diego_calc = SanDiego.CalculatorSanDiego("San Diego")
+san_diego_gis = SanDiego.GISSanDiego("San Diego")
+
 def home(request):
     template = 'reports/home.html'
 
@@ -23,8 +25,6 @@ def home(request):
         form = ReportForm(request.POST)
 
         if form.is_valid():
-            san_diego_gis = SanDiego.san_diego_gis
-            san_diego = SanDiego.san_diego
             address = form['address'].value()
 
             address_feature = san_diego_gis.get_address_feature(address)
@@ -47,19 +47,20 @@ def home(request):
                     lot_size = float(parcel_feature.lot_area)
                     transit_priority = san_diego_gis.is_transit_area(parcel_feature)
 
-                    if zone_code in san_diego.tree.nodes.keys():
-                        max_density = san_diego.get_attr_by_rule(zone_code, 'max permitted density',
+                    zone_data = san_diego_calc.zone_reader.get_zone(zone_code)
+                    if zone_data is not None:
+                        max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max permitted density',
                                                                  'maximum permitted density')
-                        max_du = san_diego.get_max_dwelling_units(lot_size, zone_code)
+                        max_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
                         max_density_calc = "{0} SF/{1} SF = {2} or ".format(str(round(lot_size, 2)), str(max_density[0]), max_du)
                         max_du = int(math.ceil(max_du))
-                        rule_dict = san_diego.tree.get_rule_dict_output(zone_code)
+                        rule_dict = san_diego_calc.zone_reader.get_rule_dict_output(zone_code)
 
                         if max_du >= 5: #todo: don't hard-code this minimum
                         # returns min affordable, bonus du, incentives
-                            vl = san_diego.get_max_low_income_bonus(max_du, "Very Low Income")
-                            l = san_diego.get_max_low_income_bonus(max_du, "Low Income")
-                            m = san_diego.get_max_low_income_bonus(max_du, "Moderate Income")
+                            vl = san_diego_calc.get_max_affordable_bonus(max_du, "Very Low Income")
+                            l = san_diego_calc.get_max_affordable_bonus(max_du, "Low Income")
+                            m = san_diego_calc.get_max_affordable_bonus(max_du, "Moderate Income")
                             incentives_vl = vl[2]
                             incentives_l = l[2]
                             incentives_m = m[2]

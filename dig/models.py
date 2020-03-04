@@ -1,7 +1,7 @@
 from django.db import models
+import simplejson as json
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
-
 
 class Address(models.Model):
     number = models.CharField(max_length=10)
@@ -43,6 +43,47 @@ class Zone(models.Model):
     class Meta:
         abstract = True
 
+"""
+Convention for storing rules in a dictionary:
+2 columns -- Development Regulations and Use Regulations. For each:
+    {'parent': <Parent or None>, 
+     'rule_dict': {
+        'category\\rule': {'category': <cat>, 'rule': <rule>, 'value': <value>, 'footnotes': [list]},
+        'category\\rule': {'category': <cat>, 'rule': <rule>, 'value': <value>, 'footnotes': [list]},
+        ...
+        } 
+    'footnotes': {'1': 'See section', '2': 'Footnote text', ...}
+    }
+All dictionaries to be stored in SQL in JSON notation
+"""
+DEFAULT_REGS = json.dumps({'parent': None, 'rule_dict': {}, 'footnotes_dict': {}})
+class ZoneInfo(models.Model):
+    name = models.CharField(max_length=50, db_index=True)
+    development_regs = models.TextField(default=DEFAULT_REGS) #should be stored as a json dictionary
+    use_regs = models.TextField(default=DEFAULT_REGS) #should be stored as a json dictionary
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        abstract = True
+"""
+Convention for storing affordable info in model:
+1 column (and likely 1 row) containing dictionary of all relevant data
+    {'low income': {min_unit: {'bonus_density': X, 'num_incentives':Y}, min_unit: {...}, ...}
+     'very low income': {min_unit: {'bonus_density': X, 'num_incentives':Y}, min_unit: {...}, ...}
+     }
+"""
+class Affordable(models.Model):
+    label = models.CharField(max_length=50, db_index=True)
+    data = models.TextField(default="{}") #should be stored as a json dictionary
+
+    def __str__(self):
+        print(self.label)
+
+    class Meta:
+        abstract = True
+
 #for San Diego
 class SanDiego_Address(Address):
     pass
@@ -75,4 +116,10 @@ class SanDiego_Zone(Zone):
     imp_date = models.CharField(max_length=20, null=True)
 
 class SanDiego_TransitArea(Zone):
+    pass
+
+class SanDiego_ZoneInfo(ZoneInfo):
+    pass
+
+class SanDiego_Affordable(Affordable):
     pass

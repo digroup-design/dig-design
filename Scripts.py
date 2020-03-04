@@ -1,41 +1,14 @@
 #This module only exists to execute one-time scripts. Nothing here should be referenced in or executed any other modules.
-import simplejson as json
-
-#remember to include .geojson at the end!
-def _get_geojson_dir(folder, filename):
-    parent_dir = os.path.abspath(os.getcwd())
-    return parent_dir + "\\data\\{0}\\geojson\\{1}".format(folder, filename)
-
-#breaks up a large file into several small files based on their main lookup property
-def break_file(folder, filename):
-    filedir = _get_geojson_dir(folder, filename)
-    file = open(filedir, 'r')
-
-    subfiles = {}
-    for i in range(1, 10):
-        sub_filedir = filedir.replace('.geojson', '[{0}].geojson'.format(str(i)))
-        subfiles[i] = open(sub_filedir, 'w')
-
-    for line in file:
-        if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
-            feature = json.loads(line.strip().rstrip(','))
-            properties = feature['properties']
-            parcel_id = str(properties['PARCELID'])
-            file_id = int(parcel_id[0])
-            subfiles[file_id].write(line)
-            print("{0} wrote to file #{1}".format(parcel_id, file_id))
-
-    file.close()
-    for f in subfiles.values(): f.close()
-
-#break_file('San Diego', 'Parcels.geojson')
-
-from django.db import models
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
 import django
-django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
+django.setup() #This is needed to run models without manage.py
+
+import simplejson as json
+from django.core.exceptions import ObjectDoesNotExist
 import dig.models as models
+import calculations.TxtConverter as TxtConverter
+import calculations.ZoneReader as ZoneReader
 
 ENTRY_SUBSTRING = '"type": "Feature"'
 
@@ -158,4 +131,126 @@ def geojson_to_transit():
     file.close()
     error_log.close()
     print('Done!')
-geojson_to_transit()
+#geojson_to_transit()
+
+#make sure there is no header
+def export_affordable(model_class, *affordable_file):
+    for a in affordable_file:
+        label = a.split('.')[0]
+        txt_array =TxtConverter.txt_to_array(open(a, 'r'), transpose=False, char_strip=["\""])
+        entry_dict = {}
+        for row in txt_array:
+            entry_dict[int(row[0])] = {'density_bonus': float(row[1]), 'incentives': int(row[2])}
+        data = json.dumps(entry_dict)
+        model = model_class(label=label, data=data)
+        model.save()
+
+#export_affordable(models.SanDiego_Affordable, 'very low income.txt', 'low income.txt', 'moderate income.txt')
+
+def export_zone(model_class, zone_file, footnotes_file=None):
+    footnotes_dict = {}
+    if footnotes_file:
+        footnotes_array = TxtConverter.txt_to_array(open(footnotes_file, 'r'), transpose=False, char_strip=["\""])
+        for f in footnotes_array:
+            footnotes_dict[f[0]] = f[1]
+
+    if 'dev' in zone_file.lower():
+        rule_class = 'Development'
+    elif 'use' in zone_file.lower():
+        rule_class = 'Use'
+    else:
+        print('Invalid zone_file name')
+        return None
+
+    txt_array =TxtConverter.txt_to_array(open(zone_file, 'r'), transpose=True, char_strip=["\""])
+    rules_row = txt_array[0]
+    for i in range(1, len(txt_array)):
+        name = txt_array[i][0]
+        #the same logic is used for both dev and use regs
+        zone_entry_dict = {'rule_dict': {}, 'footnotes_dict': {}} #omit parent
+        for j in range(1, len(rules_row)):
+            working_rule_dict= {
+                'category': None,
+                'rule': None,
+                'value': None,
+                'footnotes': []
+            }
+            if "\\" in rules_row[j]: #backslash in rule name in txt file denotes a category
+                rules_parts = rules_row[j].split("\\")
+                working_rule_dict['category'] = rules_parts[0]
+                working_rule_dict['rule'] = rules_parts[1]
+            else:
+                working_rule_dict['rule'] = rules_row[j]
+            if "[" in rules_row[j]: #rule-based footnotes are enclosed in [brackets]
+                rule_parts = [r.strip() for r in working_rule_dict['rule'].replace(']', '').split('[')]
+                working_rule_dict['rule'] = rule_parts.pop(0)
+                working_rule_dict['footnotes'] += rule_parts
+            curr_cell = txt_array[i][j]
+            if "(" in curr_cell: #individual footnotes are enclosed in (parenthesis)
+                value_parts = [c.strip() for c in curr_cell.replace(")", "").split("(")]
+                working_rule_dict['value'] = value_parts.pop(0)
+                working_rule_dict['footnotes'] += value_parts
+                for k, v in footnotes_dict.items(): #only add relevant footnotes to save space
+                    if k in working_rule_dict['footnotes']:
+                        zone_entry_dict['footnotes_dict'][k] = v
+            else:
+                working_rule_dict['value'] = curr_cell
+            entry_name = (rules_row[j].split('[')).pop(0).strip()
+            zone_entry_dict['rule_dict'][entry_name] = working_rule_dict
+        #if model already exists, get existing one. otherwise save
+        try:
+            zone_model = model_class.objects.get(name=name)
+        except ObjectDoesNotExist:
+            zone_model = model_class(name=name)
+        if 'dev' in rule_class.lower(): #decide whether to update to dev or use regs in db
+            working_dict = json.loads(zone_model.development_regs)
+            working_dict.update(zone_entry_dict)
+            zone_model.development_regs = json.dumps(working_dict)
+        else:
+            working_dict = json.loads(zone_model.use_regs)
+            working_dict.update(zone_entry_dict)
+            zone_model.use_regs = json.dumps(working_dict)
+        zone_model.save()
+
+def set_parent(model_class, parent_file):
+    parent_array = TxtConverter.txt_to_array(open(parent_file, 'r'), transpose=False, char_strip=["\""])
+    for p in parent_array:
+        try:
+            zone_model = model_class.objects.get(name=p[0])
+        except ObjectDoesNotExist:
+            zone_model = model_class(name=p[0])
+        if p[1].lower() == 'none':
+            use_parent = None
+        else:
+            use_parent = p[1]
+        if p[2].lower() == 'none':
+            dev_parent = p[2]
+        else:
+            dev_parent = p[2]
+        use_regs_dict = json.loads(zone_model.use_regs)
+        use_regs_dict['parent'] = use_parent
+        zone_model.use_regs = json.dumps(use_regs_dict)
+        dev_regs_dict = json.loads(zone_model.development_regs)
+        dev_regs_dict['parent'] = dev_parent
+        zone_model.dev_regs = json.dumps(dev_regs_dict)
+        zone_model.save()
+#set_parent(models.SanDiego_ZoneInfo, 'R Parent.txt')
+
+# file_list = [
+#     ("dev regs RE.txt", None),
+#     ("dev regs RM.txt", "dev regs RM foot.txt"),
+#     ("dev regs RS.txt", "dev regs RS foot.txt"),
+#     ("dev regs RX.txt", "dev regs RX foot.txt"),
+#     ("dev regs RT.txt", None),
+#     ("use regs R.txt", None),
+#     ("use regs RM.txt", "use regs RM foot.txt")]
+# for f in file_list:
+#     export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
+
+def test_code():
+    zone_reader = ZoneReader.ZoneReader(models.SanDiego_ZoneInfo, models.SanDiego_Affordable)
+    rule_dict = zone_reader.get_rule_dicts('RM-3-7', 'use')
+    #rule_dict = zone_reader.get_zone('RM-3-7').use_regs
+    print(rule_dict)
+
+test_code()

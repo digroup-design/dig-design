@@ -102,5 +102,3 @@ class GisDB:
             if zone_polygon.intersects(lot_polygon):
                 return True
         return False
-
-

@@ -18,7 +18,3 @@ class GISSanDiego(GISReader.GisDB):
     def is_transit_area(self, parcel_feature):
         transit_name = "Transit Priority Area"
         return self.is_in_zone(parcel_feature, transit_name, self.transit_model)
-
-san_diego = CalculatorSanDiego("San Diego")
-
-san_diego_gis = GISSanDiego("San Diego")
