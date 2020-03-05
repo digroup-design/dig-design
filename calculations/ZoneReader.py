@@ -13,21 +13,17 @@ class ZoneReader:
     returns the zone's object from the model database
     '''
     def get_zone(self, zone):
-        try:
-            return self.zone_model.objects.get(name__iexact=zone)
-        except ObjectDoesNotExist:
-            return None
+        try: return self.zone_model.objects.get(name__iexact=zone)
+        except ObjectDoesNotExist: return None
 
     #private function to use in get_rule_dicts.
     def _get_rule_dict(self, zone, lookup_col):
         zone_info = self.get_zone(zone)
-        if lookup_col.lower().startswith("dev"):
-            rule_dict_json = zone_info.development_regs
-        else:
-            rule_dict_json = zone_info.use_regs
+        if lookup_col.lower().startswith("dev"): rule_dict_json = zone_info.development_regs
+        else: rule_dict_json = zone_info.use_regs
         rule_dict = json.loads(rule_dict_json)
 
-        if rule_dict['parent'] is None:
+        if rule_dict['parent'] is None or str(rule_dict['parent']).lower() == 'none':
             return rule_dict['rule_dict']
         else: #if there is a parent, then we must get the parents' rule_dict too
             parent_rule_dict = self._get_rule_dict(rule_dict['parent'], lookup_col)

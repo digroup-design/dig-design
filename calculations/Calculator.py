@@ -76,11 +76,17 @@ class Calculator:
     returns a dictionary of values regarding calculations for getting maximum affordable bonus densities
     {'very low income': (%affordable needed, %bonus density, #incentives, market-price units, affordable units, total units)...}
     """
-    def get_max_affordable_bonus_dict(self, base_units):
+    def get_max_affordable_bonus_dict(self, base_units, transit_priority = False):
         affordable_bonus_dict = {}
         for k, v in self.affordable_dict.items(): #v is a dictionary for each of the income levels
             affordable_percent = max(v.keys())
-            bonus_density_percent = float(v[affordable_percent]['density_bonus'])
+            if transit_priority:
+                for k_sub, v_sub in v.items(): #find the minimum affordable_percent, given the maximum incentives
+                    if (v_sub['incentives'] >= v[affordable_percent]['incentives']) and (k_sub < affordable_percent):
+                        affordable_percent = k_sub
+                bonus_density_percent = 100
+            else:
+                bonus_density_percent = float(v[affordable_percent]['density_bonus'])
             num_incentives = int(v[affordable_percent]['incentives'])
             affordable_units = int(math.ceil(base_units * affordable_percent/100))
             bonus_units = int(math.ceil(base_units * bonus_density_percent/100))

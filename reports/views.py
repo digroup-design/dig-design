@@ -19,6 +19,7 @@ def home(request):
     lot_size = None
     rule_dict = None
     dwelling_area_dict = None
+    total_dwelling_area = None
     affordable_dict = None
 
     if request.method == 'POST':
@@ -61,7 +62,7 @@ def home(request):
                         rule_dict = san_diego_calc.zone_reader.get_rule_dict_output(zone_code)
 
                         if base_du >= 5: #todo: don't hard-code this minimum
-                            affordable_dict = san_diego_calc.get_max_affordable_bonus_dict(base_du)
+                            affordable_dict = san_diego_calc.get_max_affordable_bonus_dict(base_du, transit_priority)
                             print(affordable_dict)
                             total_dus = []
                             for v in affordable_dict.values():

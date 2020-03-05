@@ -213,48 +213,50 @@ def export_zone(model_class, zone_file, footnotes_file=None):
         zone_model.save()
     print("Done: {0}".format(zone_file))
 
+#make sure column1 shows use parents; column2 shows dev parents
 def set_parent(model_class, parent_file):
     parent_array = TxtConverter.txt_to_array(open(parent_file, 'r'), transpose=False, char_strip=["\""])
     for p in parent_array:
-        try:
-            zone_model = model_class.objects.get(name=p[0])
-        except ObjectDoesNotExist:
-            zone_model = model_class(name=p[0])
-        if p[1].lower() == 'none':
-            use_parent = None
-        else:
-            use_parent = p[1]
-        if p[2].lower() == 'none':
-            dev_parent = p[2]
-        else:
-            dev_parent = p[2]
+        try: zone_model = model_class.objects.get(name=p[0])
+        except ObjectDoesNotExist: zone_model = model_class(name=p[0])
+
+        if p[1].lower() == 'none': use_parent = None
+        else: use_parent = p[1]
+
         use_regs_dict = json.loads(zone_model.use_regs)
         use_regs_dict['parent'] = use_parent
         zone_model.use_regs = json.dumps(use_regs_dict)
+
+        if p[2].lower() == 'none': dev_parent = None
+        else: dev_parent = p[2]
+
         dev_regs_dict = json.loads(zone_model.development_regs)
         dev_regs_dict['parent'] = dev_parent
-        zone_model.dev_regs = json.dumps(dev_regs_dict)
+        zone_model.development_regs = json.dumps(dev_regs_dict)
+
         zone_model.save()
+        print("{0}'s parents are: {1} in use and {2} in dev".format(p[0], p[1], p[2]))
 
 # file_list = [
-#     ("dev regs RE.txt", None),
-#     ("dev regs RM.txt", "dev regs RM foot.txt"),
-#     ("dev regs RS.txt", "dev regs RS foot.txt"),
-#     ("dev regs RX.txt", "dev regs RX foot.txt"),
-#     ("dev regs RT.txt", None),
-#     ("use regs R.txt", None),
-#     ("use regs RM.txt", "use regs RM foot.txt")]
+#     ("dev regs RM.txt", "dev regs RM foot.txt")]
+
+# file_list = [
+#     ("use regs CC.tsv", 'use regs C footnotes.tsv'),
+#     ("use regs Cb.tsv", 'use regs C footnotes.tsv'),
+#     ("use regs C.tsv", 'use regs C footnotes.tsv'),
+#     ("dev regs CN.tsv", 'dev regs CN footnotes.tsv'),
+#     ("dev regs CC.tsv", 'dev regs CC footnotes.tsv'),
+#     ("dev regs C.tsv", 'dev regs C footnotes.tsv')
+# ]
 
 file_list = [
-    ("use regs CC.tsv", 'use regs C footnotes.tsv'),
-    ("use regs Cb.tsv", 'use regs C footnotes.tsv'),
-    ("use regs C.tsv", 'use regs C footnotes.tsv'),
-    ("dev regs CN.tsv", 'dev regs CN footnotes.tsv'),
-    ("dev regs CC.tsv", 'dev regs CC footnotes.tsv'),
-    ("dev regs C.tsv", 'dev regs C footnotes.tsv')
-]
+    ('use regs I.tsv', 'use regs I foot.tsv'),
+    ('dev regs I.tsv', 'dev regs I foot.tsv')
+    ]
 
-#set_parent(models.SanDiego_ZoneInfo, 'C Parent.tsv')
+for p in ['C Parent.tsv', 'I Parent.tsv']:
+    set_parent(models.SanDiego_ZoneInfo, p)
+
 #for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
 
 def test_code():
@@ -262,4 +264,4 @@ def test_code():
     search = 'density max'
     print(TxtConverter.match_search(string, search, False))
 
-test_code()
+#test_code()
