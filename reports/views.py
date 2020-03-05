@@ -44,13 +44,14 @@ def home(request):
                     pass
                 else:
                     zone_code = san_diego_gis.get_zone(parcel_feature)
+                    print(zone_code)
                     lot_size = float(parcel_feature.lot_area)
                     transit_priority = san_diego_gis.is_transit_area(parcel_feature)
 
                     zone_data = san_diego_calc.zone_reader.get_zone(zone_code)
                     if zone_data is not None:
-                        max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max permitted density',
-                                                                 'maximum permitted density')
+                        max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max density')
+                        print("Max density: {0}".format(max_density))
                         max_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
                         max_density_calc = "{0} SF/{1} SF = {2} or ".format(str(round(lot_size, 2)), str(max_density[0]), max_du)
                         max_du = int(math.ceil(max_du))

@@ -1,6 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
 import simplejson as json
-#import dig.models as models
 import calculations.TxtConverter as TxtConverter
 
 class ZoneReader:
@@ -58,7 +57,11 @@ class ZoneReader:
             else:
                 print("Invalid lookup_col entered. Need 'development or 'use'.")
                 return None
-
+    """
+    returns a dictionary containing all the affordable info for zones in the following format:
+    { 'income level 0': { [min unit %] : {'density_bonus': [density bonus %], 'incentives': [# of incentives]} },
+      'income level 1': ... } 
+    """
     def get_affordable_dict(self):
         affordable = self.affordable_model.objects.all()
         if len(affordable) > 0:
@@ -82,14 +85,13 @@ class ZoneReader:
         rule_class dictates if to be searched in Use Regulations, Development regulations or unspecified
         substr=True if rule can be a substring, else exact match required
     """
-    def get_attr_by_rule(self, zone, rule, attr_type, substr=True):
+    def get_attr_by_rule(self, zone, rule, attr_type):
         attr_type = attr_type.lower()
         if attr_type in ['class', 'category', 'rule', 'value', 'footnotes']:
             rule_dict = self.get_rule_dicts(zone)
             for k, v in rule_dict.items():
                 for v_sub in v.values():
-                    if (substr and TxtConverter.is_substring(v_sub['rule'].lower(), rule.lower())) or \
-                            ((not substr) and (v_sub['rule'].lower() == rule.lower())):
+                    if TxtConverter.match_search(v_sub['rule'], rule):
                         if attr_type == 'class':
                             return k
                         else:
@@ -98,6 +100,9 @@ class ZoneReader:
             print("Invalid attribute - select from [class, category, rule, value, footnotes]")
             return None
 
+    """
+    returns a nested dictionary to be used by views.py
+    """
     def get_rule_dict_output(self, zone):
         output_dict = {}
         rule_dicts = self.get_rule_dicts(zone)

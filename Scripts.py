@@ -211,6 +211,7 @@ def export_zone(model_class, zone_file, footnotes_file=None):
             working_dict.update(zone_entry_dict)
             zone_model.use_regs = json.dumps(working_dict)
         zone_model.save()
+    print("Done: {0}".format(zone_file))
 
 def set_parent(model_class, parent_file):
     parent_array = TxtConverter.txt_to_array(open(parent_file, 'r'), transpose=False, char_strip=["\""])
@@ -234,7 +235,6 @@ def set_parent(model_class, parent_file):
         dev_regs_dict['parent'] = dev_parent
         zone_model.dev_regs = json.dumps(dev_regs_dict)
         zone_model.save()
-#set_parent(models.SanDiego_ZoneInfo, 'R Parent.txt')
 
 # file_list = [
 #     ("dev regs RE.txt", None),
@@ -244,13 +244,22 @@ def set_parent(model_class, parent_file):
 #     ("dev regs RT.txt", None),
 #     ("use regs R.txt", None),
 #     ("use regs RM.txt", "use regs RM foot.txt")]
-# for f in file_list:
-#     export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
+
+file_list = [
+    ("use regs CC.tsv", 'use regs C footnotes.tsv'),
+    ("use regs Cb.tsv", 'use regs C footnotes.tsv'),
+    ("use regs C.tsv", 'use regs C footnotes.tsv'),
+    ("dev regs CN.tsv", 'dev regs CN footnotes.tsv'),
+    ("dev regs CC.tsv", 'dev regs CC footnotes.tsv'),
+    ("dev regs C.tsv", 'dev regs C footnotes.tsv')
+]
+
+#set_parent(models.SanDiego_ZoneInfo, 'C Parent.tsv')
+#for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
 
 def test_code():
-    zone_reader = ZoneReader.ZoneReader(models.SanDiego_ZoneInfo, models.SanDiego_Affordable)
-    rule_dict = zone_reader.get_rule_dicts('RM-3-7', 'use')
-    #rule_dict = zone_reader.get_zone('RM-3-7').use_regs
-    print(rule_dict)
+    string = 'Maximum permitted density (s.f.)'
+    search = 'density max'
+    print(TxtConverter.match_search(string, search, False))
 
 test_code()

@@ -1,4 +1,5 @@
 import numpy
+import re
 # This module handles all the conversions of txt to arrays that will be read by the CodeTree
 
 """
@@ -57,25 +58,25 @@ def rules_to_dictionary(rules_array, value_array, rule_class=''):
             'class': rule_class, 'rule': rule, 'category': category, 'value': value, 'footnotes': footnotes}
     return dictionary
 
-#match_all is True if all of *substring must be in string
-def is_substring(string, *substring, match_all = False, case_sensitive=False):
-    if not case_sensitive:
-        string = string.lower()
-        substring = [s.lower() for s in substring]
-
-    if match_all:
-        for s in substring:
-            if s not in string: return False
-        return True
-    else:
-        for s in substring:
-            if s in string: return True
-        return False
-
 # takes a string and replaces it with abbreviations, an array of tuples (full word, abbreviate)
-
 def abbreviate(string, *abbreviations):
     string = string.lower()
     for a in abbreviations:
         string = string.replace(a[0].lower(), a[1].lower())
     return string
+
+#returns true if search matches string
+def match_search(string, search, in_order=True):
+    search = re.sub(r'\W+', ' ', search).lower().strip()
+    string = re.sub(r'\W+', ' ', string).lower().strip()
+    if search == string: return True
+    else:
+        for s in search.split(' '):
+            if s not in string:
+                return False
+            else:
+                if in_order:
+                    string = string.replace(s, '~').split('~')[-1]
+        return True
+
+

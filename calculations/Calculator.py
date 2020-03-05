@@ -1,4 +1,5 @@
 from calculations.ZoneReader import ZoneReader
+import calculations.TxtConverter as TxtConverter
 import math
 import dig.models as models
 
@@ -16,19 +17,19 @@ class Calculator:
     def _build_zone_reader(self):
         self.zone_reader = ZoneReader(models.SanDiego_ZoneInfo, models.SanDiego_Affordable)
 
-    def get_attr_by_rule(self, zoning_code, *search_terms):
+    def get_attr_by_rule(self, zoning_code, search_term):
         value = None
         unit = ''
-        for s in search_terms:
-            rule_name = self.zone_reader.get_attr_by_rule(zoning_code, s, 'rule')
-            rule_value = self.zone_reader.get_attr_by_rule(zoning_code, s, 'value')
-            if '(' in str(rule_name) and ')' in str(rule_name):
-                unit = (rule_name.split('(')[-1])[0 : unit.find(')')]
-            if rule_value is not None:
-                try:
-                    value = float(rule_value.replace(',', ''))
-                except: #TypeError?
-                    value = -1
+
+        rule_name = self.zone_reader.get_attr_by_rule(zoning_code, search_term, 'rule')
+        rule_value = self.zone_reader.get_attr_by_rule(zoning_code, search_term, 'value')
+        if '(' in str(rule_name) and ')' in str(rule_name):
+            unit = (rule_name.split('(')[-1])[0 : unit.find(')')]
+        if rule_value is not None:
+            try:
+                value = float(rule_value.replace(',', ''))
+            except: #TypeError?
+                value = -1
 
         if value is None:
             return None
@@ -38,7 +39,7 @@ class Calculator:
     #calculates base max_dwelling units
     #generally designed to not need overriding if get_attr_by_rule works accordingly
     def get_max_dwelling_units(self, lot_size, zoning_code):
-        max_density_tuple = self.get_attr_by_rule(zoning_code, 'max permitted density', 'maximum permitted density', 'residential density')
+        max_density_tuple = self.get_attr_by_rule(zoning_code, 'max density')
         print(max_density_tuple)
         if max_density_tuple is None:
             print('No max density found')
@@ -47,18 +48,19 @@ class Calculator:
         density_unit = max_density_tuple[1].lower()
         density_value = max_density_tuple[0]
 
-        if density_unit in ['du/lot', 'dwelling units per lot', 'du per lot', 'dwelling units/lot']:
+        if TxtConverter.match_search(density_unit, 'du/lot') or TxtConverter.match_search(density_unit, 'dwelling unit lot'):
             return density_value
-        elif density_unit in ['sf per du', 'sf/du', 'square feet per du']:
+        elif TxtConverter.match_search(density_unit, 'sf per') or TxtConverter.match_search(density_unit, 'sf/du') or\
+                TxtConverter.match_search(density_unit, 'square feet per'):
             return lot_size/density_value
         else:
-            print("Cannot determine units: {0}".format(density_unit))
-            return -1
+            print("Cannot determine units: {0}\nWill guess that it is SF/DU by default".format(density_unit))
+            return lot_size/density_value
 
     #calculates base max dwelling area
     #generally designed to not need overriding if get_attr_by_rule works accordingly
     def get_max_dwelling_area(self, lot_size, zoning_code, floors=1):
-        far_tuple = self.get_attr_by_rule(zoning_code, 'floor area ratio', 'floor-area ratio')
+        far_tuple = self.get_attr_by_rule(zoning_code, 'floor area ratio')
         if far_tuple is None:
             print('No floor area ratio found')
             return -1
