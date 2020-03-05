@@ -57,29 +57,39 @@ class Calculator:
             print("Cannot determine units: {0}\nWill guess that it is SF/DU by default".format(density_unit))
             return lot_size/density_value
 
-    #calculates base max dwelling area
-    #generally designed to not need overriding if get_attr_by_rule works accordingly
-    def get_max_dwelling_area(self, lot_size, zoning_code, floors=1):
-        far_tuple = self.get_attr_by_rule(zoning_code, 'floor area ratio')
-        if far_tuple is None:
-            print('No floor area ratio found')
-            return -1
-        return far_tuple * lot_size
+    """
+    returns a dictionary of values regarding FAR and allowable dwelling area:
+    { 'FAR-based rule' : ([FAR parameter], [calculated result]), 'FAR-based rule #2': ([FAR parameter 2], ...}
+    """
+    def get_dwelling_area_dict(self, zone, lot_area):
+        dev_regs_dict = self.zone_reader.get_rule_dicts(zone, "development")
+        floor_area_dict = {}
+        for v in dev_regs_dict.values():
+            if TxtConverter.match_search(v['rule'], "floor area ratio"):
+                far_value = float(v['value'])
+                far_calc = far_value * lot_area
+                floor_area_dict[v['rule']] = {'far_value': far_value,
+                                              'area': far_calc}
+        return floor_area_dict
 
-    #returns a tuple (dwelling units needed, dwelling units bonus, number of incentives)
-    def get_max_affordable_bonus(self, base_dwelling_units, household, min_base_units=0):
-        if base_dwelling_units < min_base_units:
-            return 0, 0, 0
-        else:
-            household = household.lower()
-            if household not in self.affordable_dict.keys():
-                print("Invalid household type.")
-                return None
-            low_income_dict = self.affordable_dict[household]
-            max_percent = max(low_income_dict.keys())
-            print(max_percent, low_income_dict[max_percent])
-            aff_needed = math.ceil(base_dwelling_units * max_percent/100)
-            du_bonus = math.ceil(float(low_income_dict[max_percent]['density_bonus'])/100 * base_dwelling_units)
-            num_incentives = int(low_income_dict[max_percent]['incentives'])
-
-            return aff_needed, du_bonus, num_incentives
+    """
+    returns a dictionary of values regarding calculations for getting maximum affordable bonus densities
+    {'very low income': (%affordable needed, %bonus density, #incentives, market-price units, affordable units, total units)...}
+    """
+    def get_max_affordable_bonus_dict(self, base_units):
+        affordable_bonus_dict = {}
+        for k, v in self.affordable_dict.items(): #v is a dictionary for each of the income levels
+            affordable_percent = max(v.keys())
+            bonus_density_percent = float(v[affordable_percent]['density_bonus'])
+            num_incentives = int(v[affordable_percent]['incentives'])
+            affordable_units = int(math.ceil(base_units * affordable_percent/100))
+            bonus_units = int(math.ceil(base_units * bonus_density_percent/100))
+            total_units = base_units + bonus_units
+            market_price_units = total_units - affordable_units
+            affordable_bonus_dict[k.lower()] = {'percent_affordable': affordable_percent,
+                                                'percent_bonus_density': bonus_density_percent,
+                                                'incentives': num_incentives,
+                                                'market_price_units': market_price_units,
+                                                'affordable_units': affordable_units,
+                                                'total_units': total_units}
+        return affordable_bonus_dict

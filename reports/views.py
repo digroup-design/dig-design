@@ -10,6 +10,7 @@ def home(request):
     template = 'reports/home.html'
 
     address_proper_street = address_proper_city = None
+    base_du = None
     max_du = None
     max_density_calc = None
     zone_code = None
@@ -17,9 +18,8 @@ def home(request):
     transit_priority = False
     lot_size = None
     rule_dict = None
-    units_mp_vl = units_aff_vl = incentives_vl = units_mp_l =\
-        units_aff_l = incentives_l = units_mp_m = units_aff_m = incentives_m =\
-        max_total_units = None
+    dwelling_area_dict = None
+    affordable_dict = None
 
     if request.method == 'POST':
         form = ReportForm(request.POST)
@@ -49,29 +49,26 @@ def home(request):
                     transit_priority = san_diego_gis.is_transit_area(parcel_feature)
 
                     zone_data = san_diego_calc.zone_reader.get_zone(zone_code)
+
+                    dwelling_area_dict = san_diego_calc.get_dwelling_area_dict(zone_code, lot_size)
+                    print(dwelling_area_dict)
                     if zone_data is not None:
                         max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max density')
                         print("Max density: {0}".format(max_density))
-                        max_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
-                        max_density_calc = "{0} SF/{1} SF = {2} or ".format(str(round(lot_size, 2)), str(max_density[0]), max_du)
-                        max_du = int(math.ceil(max_du))
+                        base_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
+                        max_density_calc = "{0} / {1} = {2} or ".format(str(round(lot_size, 2)), str(max_density[0]), base_du)
+                        base_du = int(math.ceil(base_du))
                         rule_dict = san_diego_calc.zone_reader.get_rule_dict_output(zone_code)
 
-                        if max_du >= 5: #todo: don't hard-code this minimum
-                        # returns min affordable, bonus du, incentives
-                            vl = san_diego_calc.get_max_affordable_bonus(max_du, "Very Low Income")
-                            l = san_diego_calc.get_max_affordable_bonus(max_du, "Low Income")
-                            m = san_diego_calc.get_max_affordable_bonus(max_du, "Moderate Income")
-                            incentives_vl = vl[2]
-                            incentives_l = l[2]
-                            incentives_m = m[2]
-                            units_aff_vl = vl[0]
-                            units_aff_l = l[0]
-                            units_aff_m = m[0]
-                            units_mp_vl = max_du + vl[1] - units_aff_vl
-                            units_mp_l = max_du + l[1] - units_aff_l
-                            units_mp_m = max_du + m[1] - units_aff_m
-                            max_total_units = max([max_du + vl[1], max_du + l[1], max_du + m[1]])
+                        if base_du >= 5: #todo: don't hard-code this minimum
+                            affordable_dict = san_diego_calc.get_max_affordable_bonus_dict(base_du)
+                            print(affordable_dict)
+                            total_dus = []
+                            for v in affordable_dict.values():
+                                total_dus.append(v['total_units'])
+                            max_du = max(total_dus)
+                        else:
+                            max_du = base_du
     else:
         form = ReportForm()
 
@@ -83,19 +80,12 @@ def home(request):
         'area': lot_size,
         'apn': apn,
         'transit_priority': transit_priority,
-        'max_du_calc': max_density_calc,
-        'max_du': max_du,
+        'base_du_calc': max_density_calc,
+        'base_du': base_du,
         'rule_dict': rule_dict,
-        'units_mp_vl': units_mp_vl,
-        'units_aff_vl': units_aff_vl,
-        'incentives_vl': incentives_vl,
-        'units_mp_l': units_mp_l,
-        'units_aff_l': units_aff_l,
-        'incentives_l': incentives_l,
-        'units_mp_m': units_mp_m,
-        'units_aff_m': units_aff_m,
-        'incentives_m': incentives_m,
-        'max_total_units': max_total_units
+        'dwelling_area_dict': dwelling_area_dict,
+        'affordable_dict': affordable_dict,
+        'max_du': max_du
     }
 
     return render(request, template, output)

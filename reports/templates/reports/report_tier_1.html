@@ -25,15 +25,15 @@
         </tr>
     </table>
 </div><br>
-<div>{% if max_du %}
+<div>{% if base_du %}
     <table style="width:100%">
         <tr>
             <th colspan="2" style="text-align:center"><h4>Maximum Dwelling Units</h4></th>
         </tr>
         <tr>
             <td align="right"><b>Base Dwelling Units: </b></td>
-            <td>{{ max_du_calc }}<b>{{ max_du }}</b></td>
-        </tr>{% if incentives_vl %}
+            <td>{{ base_du_calc }}<b>{{ base_du }}</b></td>
+        </tr>{% if affordable_dict %}
         <tr>
             <th colspan="2" style="text-align:center"><i>Affordable Housing: </i></th>
         </tr>
@@ -41,29 +41,19 @@
             <td colspan="2" style="text-align:center">
                 <table style="text-align:center; width:100%">
                     <tr>
-                        <th>Household Income</th>
+                        <th> </th>
                         <th>Market-Price Units</th>
                         <th>Affordable Units</th>
                         <th>Incentives</th>
                     </tr>
+                    {% for k, v in affordable_dict.items %}
                     <tr>
-                        <td><b>Very Low</b></td>
-                        <td>{{ units_mp_vl }}</td>
-                        <td>{{ units_aff_vl }}</td>
-                        <td>{{ incentives_vl }}</td>
+                        <td><b>{{ k|title }}</b></td>
+                        <td>{{ v.market_price_units }}</td>
+                        <td>{{ v.affordable_units }}</td>
+                        <td>{{ v.incentives }}</td>
                     </tr>
-                    <tr>
-                        <td><b>Low</b></td>
-                        <td>{{ units_mp_l }}</td>
-                        <td>{{ units_aff_l }}</td>
-                        <td>{{ incentives_l }}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Moderate</b></td>
-                        <td>{{ units_mp_m }}</td>
-                        <td>{{ units_aff_m }}</td>
-                        <td>{{ incentives_m }}</td>
-                    </tr>
+                    {% endfor %}
                 </table>
             </td>
         </tr>
@@ -72,7 +62,7 @@
         </tr>
         <tr>
             <td align="right"><b>Maximum Dwelling Units: </b></td>
-            <td>{{ max_total_units }}</td>
+            <td>{{ max_du }}</td>
         </tr>{% else %}
         <tr>
             <th>Not eligible for affordable bonus</th>
@@ -82,6 +72,27 @@
     {% endif %}
 </div>
 <br>
+<div>
+    {% if dwelling_area_dict %}
+    <table style="width:100%">
+        <tr>
+            <th style="text-align:center" colspan="2"><b>Dwelling Area</b></th>
+        </tr>
+        <tr>
+            <th> </th>
+            <th>Parameter</th>
+            <th>Area</th>
+        </tr>
+        {% for k, v in dwelling_area_dict.items %}
+        <tr>
+            <td>{{ k }}</td>
+            <td>{{ v.far_value }}</td>
+            <td>{{ v.area }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
 <div>
     {% if rule_dict %}
     <table style="width:100%">
