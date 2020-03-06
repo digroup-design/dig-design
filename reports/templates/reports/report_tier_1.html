@@ -20,22 +20,31 @@
             <td>{% if area %}{{ area|floatformat:"2" }} SF{% else %}Parcel data not found{% endif %}</td>
         </tr>
         <tr>
-            <td align="right"><b>Transit Priority Area: </b></td>
-            <td>{% if area %}{{ transit_priority }}{% else %}Parcel data not found{% endif %}</td>
+            <td><br></td>
         </tr>
-    </table>
-</div><br>
-<div>{% if base_du %}
-    <table style="width:100%">
         <tr>
-            <th colspan="2" style="text-align:center"><h4>Maximum Dwelling Units</h4></th>
+            <td align="right"><b>Base Buildable Area: </b></td>
+            <td>{% if base_buildable_area %}<b>{{ base_buildable_area|floatformat:"2" }} SF</b> {% else %} FAR data not found {% endif %}</td>
         </tr>
         <tr>
             <td align="right"><b>Base Dwelling Units: </b></td>
-            <td>{{ area|floatformat:"2"}} / {{ max_density }} = {{ base_du|floatformat:"2" }} or <b>{{ base_du_rounded }}</b></td>
-        </tr>{% if affordable_dict %}
+            <td>{% if base_du %} {{ area|floatformat:"2"}} / {{ max_density }} = {{ base_du|floatformat:"2" }} or <b>{{ base_du_rounded }}</b>{% else %} Zoning data not found {% endif %}</td>
+        </tr>
         <tr>
-            <th colspan="2" style="text-align:center"><i>Affordable Housing: </i></th>
+            <td><br></td>
+        </tr>
+        <tr>
+            <td align="right"><b>Max Dwelling Units: </b></td>
+            <td>{% if max_du %} <b>{{ max_du }}</b> {% else %} Zoning data not found {% endif %}</td>
+        </tr>
+
+    </table>
+</div><br>
+<div>
+    <table style="width:100%">
+        {% if affordable_dict %}
+        <tr>
+            <th colspan="2" style="text-align:center"><u>Affordable Housing Calculations</u></th>
         </tr>
         <tr>
             <td colspan="2" style="text-align:center">
@@ -48,35 +57,34 @@
                     </tr>
                     {% for k, v in affordable_dict.items %}
                     <tr>
-                        <td><b>{{ k|title }}</b></td>
+                        <td style="text-align:right"><b>{{ k|title }}</b></td>
                         <td>{{ v.market_price_units }}</td>
                         <td>{{ v.affordable_units }}</td>
                         <td>{{ v.incentives }}</td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td style="text-align:right"><b>Transit Priority Area</b></td>
+                        <td>{% if area %}{{ transit_priority }}{% else %}Parcel data not found{% endif %}</td>
+                    </tr>
                 </table>
             </td>
         </tr>
         <tr>
             <td><br></td>
         </tr>
-        <tr>
-            <td align="right"><b>Maximum Dwelling Units: </b></td>
-            <td>{{ max_du }}</td>
-        </tr>{% else %}
+        {% else %}
         <tr>
             <th>Not eligible for affordable bonus</th>
         </tr>{% endif %}
-    </table>{% else %}
-    <p><b>Dwelling Unit calculations currently unavailable</b></p>
-    {% endif %}
+    </table>
 </div>
 <br>
 <div>
     {% if dwelling_area_dict %}
     <table style="width:100%">
         <tr>
-            <th style="text-align:center" colspan="3"><b>Buildable Area</b></th>
+            <th style="text-align:center" colspan="3"><b><u>Buildable Area</u></b></th>
         </tr>
         <tr>
             <th> </th>

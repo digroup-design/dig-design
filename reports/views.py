@@ -12,7 +12,8 @@ def home(request):
     address_proper_street = address_proper_city = None
     base_du = None
     max_du = None
-    max_density_value= None
+    max_density_value = None
+    base_buildable_area = None
     zone_code = None
     apn = None
     transit_priority = False
@@ -42,6 +43,7 @@ def home(request):
                 #Run the calculator here
                 parcel_feature = san_diego_gis.get_parcel_feature(address_feature.parcel_id)
                 if parcel_feature is None:
+                    print("Parcel data not found")
                     pass
                 else:
                     zone_code = san_diego_gis.get_zone(parcel_feature)
@@ -51,11 +53,14 @@ def home(request):
 
                     zone_data = san_diego_calc.zone_reader.get_zone(zone_code)
 
-                    dwelling_area_dict = san_diego_calc.get_dwelling_area_dict(zone_code, lot_size)
-                    print(dwelling_area_dict)
                     if zone_data is not None:
+                        dwelling_area_dict = san_diego_calc.get_dwelling_area_dict(zone_code, lot_size)
+                        if dwelling_area_dict: #assumes first entry is max dwelling area
+                            base_buildable_area = dwelling_area_dict[list(dwelling_area_dict.keys())[0]]['area']
+                        print(dwelling_area_dict)
                         max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max density')
-                        if max_density: max_density_value = ' '.join([str(s) for s in max_density])
+                        if max_density:
+                            max_density_value = ' '.join([str(s) for s in max_density])
                         print("Max density: {0}".format(max_density))
                         base_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
                         base_du_rounded = int(math.ceil(base_du))
@@ -84,12 +89,12 @@ def home(request):
         'max_density': max_density_value,
         'base_du': base_du,
         'base_du_rounded': base_du_rounded,
+        'base_buildable_area': base_buildable_area,
         'rule_dict': rule_dict,
         'dwelling_area_dict': dwelling_area_dict,
         'affordable_dict': affordable_dict,
         'max_du': max_du
     }
-
     return render(request, template, output)
 
 def about(request):
