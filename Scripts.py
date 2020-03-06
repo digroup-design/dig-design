@@ -250,14 +250,14 @@ def set_parent(model_class, parent_file):
 # ]
 
 file_list = [
-    ('use regs I.tsv', 'use regs I foot.tsv'),
-    ('dev regs I.tsv', 'dev regs I foot.tsv')
+    ('use regs rmx.tsv', 'use regs rmx foot.tsv'),
+    ('dev regs rmx.tsv', 'dev regs rmx foot.tsv')
     ]
 
-for p in ['C Parent.tsv', 'I Parent.tsv']:
-    set_parent(models.SanDiego_ZoneInfo, p)
+# for p in ['C Parent.tsv', 'I Parent.tsv']:
+#     set_parent(models.SanDiego_ZoneInfo, p)
 
-#for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
+for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
 
 def test_code():
     string = 'Maximum permitted density (s.f.)'

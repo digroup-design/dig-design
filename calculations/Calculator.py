@@ -62,15 +62,18 @@ class Calculator:
     { 'FAR-based rule' : ([FAR parameter], [calculated result]), 'FAR-based rule #2': ([FAR parameter 2], ...}
     """
     def get_dwelling_area_dict(self, zone, lot_area):
-        dev_regs_dict = self.zone_reader.get_rule_dicts(zone, "development")
-        floor_area_dict = {}
-        for v in dev_regs_dict.values():
-            if TxtConverter.match_search(v['rule'], "floor area ratio"):
-                far_value = float(v['value'])
-                far_calc = far_value * lot_area
-                floor_area_dict[v['rule']] = {'far_value': far_value,
-                                              'area': far_calc}
-        return floor_area_dict
+        try:
+            dev_regs_dict = self.zone_reader.get_rule_dicts(zone, "development")
+            floor_area_dict = {}
+            for v in dev_regs_dict.values():
+                if TxtConverter.match_search(v['rule'], "floor area ratio"):
+                    far_value = float(v['value'])
+                    far_calc = far_value * lot_area
+                    floor_area_dict[v['rule']] = {'far_value': far_value,
+                                                  'area': far_calc}
+            return floor_area_dict
+        except ValueError:
+            return None
 
     """
     returns a dictionary of values regarding calculations for getting maximum affordable bonus densities

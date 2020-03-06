@@ -84,7 +84,7 @@ class Affordable(models.Model):
     class Meta:
         abstract = True
 
-#for San Diego
+#San Diego models
 class SanDiego_Address(Address):
     pass
 
@@ -122,4 +122,8 @@ class SanDiego_ZoneInfo(ZoneInfo):
     pass
 
 class SanDiego_Affordable(Affordable):
+    pass
+
+#San Jose models
+class SanJose_ZoneInfo(ZoneInfo):
     pass

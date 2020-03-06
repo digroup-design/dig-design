@@ -12,14 +12,14 @@ def home(request):
     address_proper_street = address_proper_city = None
     base_du = None
     max_du = None
-    max_density_calc = None
+    max_density_value= None
     zone_code = None
     apn = None
     transit_priority = False
     lot_size = None
     rule_dict = None
     dwelling_area_dict = None
-    total_dwelling_area = None
+    base_du_rounded = None
     affordable_dict = None
 
     if request.method == 'POST':
@@ -55,21 +55,21 @@ def home(request):
                     print(dwelling_area_dict)
                     if zone_data is not None:
                         max_density = san_diego_calc.get_attr_by_rule(zone_code, 'max density')
+                        if max_density: max_density_value = ' '.join([str(s) for s in max_density])
                         print("Max density: {0}".format(max_density))
                         base_du = san_diego_calc.get_max_dwelling_units(lot_size, zone_code)
-                        max_density_calc = "{0} / {1} = {2} or ".format(str(round(lot_size, 2)), str(max_density[0]), base_du)
-                        base_du = int(math.ceil(base_du))
+                        base_du_rounded = int(math.ceil(base_du))
                         rule_dict = san_diego_calc.zone_reader.get_rule_dict_output(zone_code)
 
-                        if base_du >= 5: #todo: don't hard-code this minimum
-                            affordable_dict = san_diego_calc.get_max_affordable_bonus_dict(base_du, transit_priority)
+                        if base_du_rounded >= 5: #todo: don't hard-code this minimum
+                            affordable_dict = san_diego_calc.get_max_affordable_bonus_dict(base_du_rounded, transit_priority)
                             print(affordable_dict)
                             total_dus = []
                             for v in affordable_dict.values():
                                 total_dus.append(v['total_units'])
                             max_du = max(total_dus)
                         else:
-                            max_du = base_du
+                            max_du = base_du_rounded
     else:
         form = ReportForm()
 
@@ -81,8 +81,9 @@ def home(request):
         'area': lot_size,
         'apn': apn,
         'transit_priority': transit_priority,
-        'base_du_calc': max_density_calc,
+        'max_density': max_density_value,
         'base_du': base_du,
+        'base_du_rounded': base_du_rounded,
         'rule_dict': rule_dict,
         'dwelling_area_dict': dwelling_area_dict,
         'affordable_dict': affordable_dict,

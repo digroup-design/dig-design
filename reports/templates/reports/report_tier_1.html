@@ -17,7 +17,7 @@
         </tr>
         <tr>
             <td align="right"><b>Lot Size: </b></td>
-            <td>{% if area %}{{ area }} SF{% else %}Parcel data not found{% endif %}</td>
+            <td>{% if area %}{{ area|floatformat:"2" }} SF{% else %}Parcel data not found{% endif %}</td>
         </tr>
         <tr>
             <td align="right"><b>Transit Priority Area: </b></td>
@@ -32,7 +32,7 @@
         </tr>
         <tr>
             <td align="right"><b>Base Dwelling Units: </b></td>
-            <td>{{ base_du_calc }}<b>{{ base_du }}</b></td>
+            <td>{{ area|floatformat:"2"}} / {{ max_density }} = {{ base_du|floatformat:"2" }} or <b>{{ base_du_rounded }}</b></td>
         </tr>{% if affordable_dict %}
         <tr>
             <th colspan="2" style="text-align:center"><i>Affordable Housing: </i></th>
@@ -87,10 +87,12 @@
         <tr>
             <td>{{ k }}</td>
             <td>{{ v.far_value }}</td>
-            <td>{{ v.area }}</td>
+            <td>{{ v.area|floatformat:"2" }}</td>
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <b><i>Floor-area ratio varies. See code for information on buildable area.</i></b>
     {% endif %}
 </div>
 <br>
