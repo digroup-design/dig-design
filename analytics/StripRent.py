@@ -1,26 +1,27 @@
 import numpy as np
-from scipy import stats
-import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression
+from pandas import DataFrame
 
-def txt_to_array(filename)->(list, list):
+def txt_to_dict(filename)->(list, list):
+    dict = {}
     datatable = [r.strip().split('\t') for r in open(filename, 'r')]
     for i in range(0, len(datatable)):
         for j in range(0, len(datatable[i])):
             datatable[i][j] = float(datatable[i][j])
 
-    np.transpose(datatable)
-    #y = [r.pop(0) for r in datatable]
-    y = datatable.pop(0)
-    x = datatable
-    return x, y
+    datatable = np.transpose(datatable)
+    dict['y'] = datatable[0]
+    for i in range(1, len(datatable)):
+        dict['x'+str(i)] = datatable[i]
+    return dict
 
-inputs = txt_to_array('SJ_Studios.txt')
-x = np.transpose(inputs[0])
-y = inputs[1]
-print(x, y)
-print(stats.mstats.linregress(x, y))
+inputs = txt_to_dict('SJ_Studios.txt')
+df = DataFrame(inputs, columns=list(inputs.keys()))
+x_list = [x for x in inputs.keys() if x is not 'y']
 
+x = df[x_list]
+y = df['y']
 
-
-def func_rent_per_sf(coeff: list):
-    pass
+reg = LinearRegression().fit(x, y)
+print(reg.intercept_)
+print(reg.coef_)
