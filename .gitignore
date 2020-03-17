@@ -4,6 +4,7 @@ venv
 *.xlsx
 *.geojson
 */data
+*/data/*
 *rootkey.csv
 logs.txt
 *.zip

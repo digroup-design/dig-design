@@ -127,3 +127,27 @@ class SanDiego_Affordable(Affordable):
 #San Jose models
 class SanJose_ZoneInfo(ZoneInfo):
     pass
+
+class SanJose_Zone(Zone):
+    color_code = models.CharField(max_length=10, null=True)
+
+class SanJose_Parcel(Parcel):
+    apn = models.CharField(max_length=20, null=True)
+
+class SanJose_Address(Address):
+    full_address = models.CharField(max_length=100, null=True)
+    number_pre = models.CharField(max_length=30, null=True)
+    number_sfx = models.CharField(max_length=30, null=True)
+    street_name_pre = models.CharField(max_length=20, null=True)
+    street_name_pre_sep = models.CharField(max_length=20, null=True)
+    room = models.CharField(max_length=20, null=True)
+    seat = models.CharField(max_length=20, null=True)
+    unit_full = models.CharField(max_length=20, null=True)
+    jurisdiction = models.CharField(max_length=20, null=True)
+    def __str__(self):
+        if self.full_address is not None:
+            return self.full_address
+        else:
+            join_str = [str(s) for s in [self.number, self.street_name, self.street_sfx, self.unit] if
+                        s is not None]
+            return ' '.join(join_str)

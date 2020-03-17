@@ -8,7 +8,7 @@ import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 import dig.models as models
 import calculations.TxtConverter as TxtConverter
-import calculations.ZoneReader as ZoneReader
+from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 
 ENTRY_SUBSTRING = '"type": "Feature"'
 
@@ -59,6 +59,48 @@ def geojson_to_address():
         print("Done. No errors found.")
 #geojson_to_address()
 
+def geojson_to_address_sj():
+    file_dir = 'data/San Jose/geojson/SJ_Site_Address_Points.geojson'
+    num_lines = sum(1 for i in open(file_dir, 'rb'))
+    i = 0
+    error_log = open('error_logs_address.txt', 'w')
+    for line in open(file_dir, 'r'):
+        if ENTRY_SUBSTRING.lower() in line.lower():  # checks if line in geojson is a Feature entry
+            feature = json.loads(line.strip().rstrip(','))
+            number_pre = feature['properties']['AddNum_Pre']
+            number = feature['properties']['Add_Number']
+            number_sfx = feature['properties']['AddNum_Suf']
+            unit = feature['properties']['Unit']
+            room = feature['properties']['Room']
+            seat = feature['properties']['Seat']
+            unit_full = feature['properties']['FullUnit']
+            street_name_pre = feature['properties']['St_PreTyp']
+            street_name_pre_sep = feature['properties']['St_PreSep']
+            street_name = feature['properties']['StreetName']
+            street_sfx = feature['properties']['St_PosTypU']
+            city = feature['properties']['Inc_Muni']
+            zip_code = feature['properties']['Post_Code']
+            state = feature['properties']['State']
+            apn = feature['properties']['APN']
+            parcel_id = feature['properties']['ParcelID']
+            jurisdiction = feature['properties']['Juris_Auth']
+            full_address = feature['properties']['FullMailin']
+            model = models.SanJose_Address(number=number, unit=unit, street_name=street_name, street_sfx=street_sfx,
+                                           number_pre=number_pre, number_sfx = number_sfx, street_name_pre=street_name_pre,
+                                           street_name_pre_sep=street_name_pre_sep, room=room, seat=seat, unit_full=unit_full,
+                                           city=city, state=state, zip=zip_code, apn=apn, parcel_id=parcel_id,
+                                           jurisdiction=jurisdiction, full_address=full_address)
+            try:
+                model.save()
+                print('{0}/{2}: {1}'.format(i, model, num_lines))
+            except:
+                error_log.write(line)
+                print('{0}/{2}: {1} -- Error found'.format(i, model, num_lines))
+            i += 1
+    error_log.close()
+
+#geojson_to_address_sj()
+
 def geojson_to_parcel():
     file_dir = '../data/San Diego/geojson/Parcels.geojson'
     num_lines = sum(1 for i in open(file_dir, 'rb'))
@@ -106,7 +148,29 @@ def geojson_to_parcel():
     error_log.close()
     print('Done!')
 
-#models.SanDiego_Zone.objects.all().delete()
+# def geojson_to_parcel_sj():
+#     file_dir = 'data/San Jose/geojson/Parcel.geojson'
+#     num_lines = sum(1 for i in open(file_dir, 'rb'))
+#     i = 0
+#     error_log = open('Parcels_log.txt', 'w')
+#     file = open(file_dir, 'r')
+#     for line in file:
+#         if ENTRY_SUBSTRING.lower() in line.lower():
+#             feature = json.loads(line.strip().rstrip(','))
+#             parcel_id = feature['properties']['PARCELID']
+#             apn = feature['properties']['APN']
+#             geometry = feature['geometry']
+#             lot_area = round(shape(geometry).area, 8)
+#             model = models.SanJose_Parcel(parcel_id=parcel_id, apn=apn, lot_area=lot_area, geometry=geometry)
+#             i += 1
+#             progress = '{0}/{1}'.format(str(i), str(num_lines))
+#             try:
+#                 model.save()
+#                 print('{0}: {1}'.format(progress, model))
+#             except IndexError:
+#                 error_log.write(line.strip() + '\n')
+#                 print('{0}: {1} -- Error found!'.format(progress, model))
+#     error_log.close()
 
 def geojson_to_transit():
     file_dir = 'data/San Diego/geojson/TRANSIT_PRIORITY_AREA.geojson'
@@ -133,6 +197,30 @@ def geojson_to_transit():
     print('Done!')
 #geojson_to_transit()
 
+def geojson_to_zone_sj():
+    file_dir = 'data/San Jose/geojson/Zoning Districts.geojson'
+    num_lines = sum(1 for i in open(file_dir, 'rb'))
+    i = 0
+    error_log = open('Zone_log.txt', 'w')
+    file = open(file_dir, 'r')
+    for line in file:
+        if ENTRY_SUBSTRING.lower() in line.lower():
+            feature = json.loads(line.strip().rstrip(','))
+            name = feature['properties']['ZONING']
+            color_code = feature['properties']['COLORCODE']
+            geometry = feature['geometry']
+            model = models.SanJose_Zone(name=name, color_code=color_code, geometry=geometry)
+            i += 1
+            progress = '{0}/{1}'.format(str(i), str(num_lines))
+            try:
+                model.save()
+                print('{0}: {1}'.format(progress, model))
+            except:
+                error_log.write(line.strip() + '\n')
+                print('{0}: {1} -- Error found!'.format(progress, model))
+    error_log.close()
+
+geojson_to_zone_sj()
 #make sure there is no header
 def export_affordable(model_class, *affordable_file):
     for a in affordable_file:
@@ -257,11 +345,11 @@ file_list = [
 # for p in ['C Parent.tsv', 'I Parent.tsv']:
 #     set_parent(models.SanDiego_ZoneInfo, p)
 
-for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
-
-def test_code():
-    string = 'Maximum permitted density (s.f.)'
-    search = 'density max'
-    print(TxtConverter.match_search(string, search, False))
+# for f in file_list: export_zone(models.SanDiego_ZoneInfo, f[0], f[1])
+#
+# def test_code():
+#     string = 'Maximum permitted density (s.f.)'
+#     search = 'density max'
+#     print(TxtConverter.match_search(string, search, False))
 
 #test_code()

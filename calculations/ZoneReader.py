@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 import simplejson as json
 import calculations.TxtConverter as TxtConverter
+from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 
 class ZoneReader:
     def __init__(self, zone_model, affordable_model):
