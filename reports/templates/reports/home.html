@@ -10,8 +10,10 @@
                 <button type="submit">Submit</button>
             </form>
         </div>
-        {% if address_proper %}
+        {% if has_info %}
             {% include "reports/report_tier_1.html" %}
+        {% elif error %}
+            <b>{{ error }}</b>
         {% endif %}
     </div>
 {% endblock content %}
