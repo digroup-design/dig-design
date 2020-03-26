@@ -3,6 +3,7 @@ venv
 *.xlsm
 *.xlsx
 *.geojson
+*.json
 */data
 */data/*
 *rootkey.csv

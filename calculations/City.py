@@ -1,6 +1,8 @@
+from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 """
 An abstract class for querying an Address.
 """
+
 class AddressQuery:
     data = { "address": None, #may be built using street_number, street_name, street_sfx, city, etc
              "street_number": None,
@@ -42,3 +44,20 @@ class AddressQuery:
             return self.data["address"]
         else:
             return "N/A"
+
+"""
+static methods generally used for MongoDB-related queries
+"""
+def get_overlaps(parcel_geometry: dict, zone_collection) -> list:
+    overlap_entries = []
+    parcel_shape = shape(parcel_geometry)
+    for z in zone_collection.find({}):
+        if parcel_shape.intersects(shape(z["geometry"])): overlap_entries.append(z)
+    return overlap_entries[]
+
+def concat_find(collection, search_term: str, fields: list):
+    concat_list = []
+    for f in fields: concat_list += ["$" + f]
+    return collection.find({"$expr": {"$regexMatch": {"input": {"$concat": concat_list},
+                                                      "regex": search_term,
+                                                      "options": "ix"}}})

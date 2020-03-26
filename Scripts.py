@@ -3,14 +3,18 @@ import os
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dig.settings')
 django.setup() #This is needed to run models without manage.py
-
+import calculations.GLOBALS as GLOBALS
 import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 import dig.models as models
 import calculations.TxtConverter as TxtConverter
-from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 
 ENTRY_SUBSTRING = '"type": "Feature"'
+def feature_to_dict(string):
+    if ENTRY_SUBSTRING.lower() in string.lower():
+        return json.loads(string.strip().rstrip(','))
+    else:
+        return None
 
 def geojson_to_zone():
     file = open('data/San Diego/geojson/ZONING_BASE_SD.geojson')
@@ -220,7 +224,7 @@ def geojson_to_zone_sj():
                 print('{0}: {1} -- Error found!'.format(progress, model))
     error_log.close()
 
-geojson_to_zone_sj()
+#geojson_to_zone_sj()
 #make sure there is no header
 def export_affordable(model_class, *affordable_file):
     for a in affordable_file:
@@ -353,3 +357,35 @@ file_list = [
 #     print(TxtConverter.match_search(string, search, False))
 
 #test_code()
+
+def strip_file(file):
+    outfile = open(file.replace(".", "-strip."), "w")
+    for line in open(file, "r"):
+        outfile.write(str(line).strip())
+    outfile.close()
+
+# file_list = ["address_points", "parcels", "zones"]
+# for f in file_list:
+#     strip_file("sanjose_{0}.json".format(f))
+
+# import calculations.SanJose as SanJose
+# san_jose = SanJose.SanJose()
+# san_jose.get()
+
+def geojson_to_collection(geojson, collection):
+    print("Importing {0}...".format(geojson))
+    num_lines = sum(1 for i in open(geojson, 'rb'))
+    i = 0
+    for line in open(geojson, "r"):
+        feature = feature_to_dict(str(line))
+        if feature:
+            feature_dict = {"properties": feature["properties"], "geometry": feature["geometry"]}
+            collection.insert_one(feature_dict)
+            print("Progress: {0} / {1}".format(i, num_lines))
+        i += 1
+
+#geojson_to_collection("sanjose_zones.json", GLOBALS.client["san_jose"]["zones"])
+
+geojson_to_collection("sanjose_address_points.json", GLOBALS.client["san_jose"]["address"])
+
+geojson_to_collection("sanjose_parcels.json", GLOBALS.client["san_jose"]["parcels"])
