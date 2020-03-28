@@ -1,7 +1,21 @@
 from pymongo import MongoClient
+import psycopg2
 
 connect_string = "mongodb+srv://digdesign:<Diggit123>@cluster0-t0vfo.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(connect_string)
+
+postgres = {'NAME': 'DIG_geojson',
+            'PASSWORD': 'WIrqJruyTSAC8QSIxpTY',
+            'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
+            'USER': 'postgres',
+            'PORT': '5432'}
+pg_client = psycopg2.connect(host=postgres['HOST'],
+                                   database=postgres['NAME'],
+                                   user=postgres['USER'],
+                                   password=postgres['PASSWORD'],
+                                   port=postgres['PORT'])
+
+
 
 #
 #

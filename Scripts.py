@@ -8,6 +8,7 @@ import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 import dig.models as models
 import calculations.TxtConverter as TxtConverter
+import calculations.City as City
 
 ENTRY_SUBSTRING = '"type": "Feature"'
 def feature_to_dict(string):
@@ -384,8 +385,30 @@ def geojson_to_collection(geojson, collection):
             print("Progress: {0} / {1}".format(i, num_lines))
         i += 1
 
+def geojson_to_sql(geojson, sql_table):
+    print("Importing {0}...".format(geojson))
+    num_lines = sum(1 for i in open(geojson, 'rb'))
+    i = 0
+    fields = None
+    insert = "insert into {0} (%s) values %s".format(sql_table)
+    for line in open(geojson, "r"):
+        feature = feature_to_dict(str(line))
+        if feature:
+            feature_dict = feature["properties"]
+            feature_dict["geometry"] = feature["geometry"]
+            if fields is None:
+                fields = [k for k in feature_dict.keys()]
+                print("Create table here")
+
+            #cursor.mogrify(insert, (AsIs(",".join(fields), tuple(feature_dict.values()))))
+            sql_table.insert_one(feature_dict)
+            print("Progress: {0} / {1}".format(i, num_lines))
+        i += 1
+
 #geojson_to_collection("sanjose_zones.json", GLOBALS.client["san_jose"]["zones"])
 
-geojson_to_collection("sanjose_address_points.json", GLOBALS.client["san_jose"]["address"])
+#geojson_to_collection("sanjose_address_points.json", GLOBALS.client["san_jose"]["address"])
 
-geojson_to_collection("sanjose_parcels.json", GLOBALS.client["san_jose"]["parcels"])
+#geojson_to_collection("sanjose_parcels.json", GLOBALS.client["san_jose"]["parcels"])
+
+print(City.test())
