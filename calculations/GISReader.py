@@ -4,6 +4,7 @@ import simplejson as json
 from django.db.models.functions import Concat, Replace
 from django.db.models import Value as V
 import dig.models as models
+import database as db
 
 class GisDB:
     def __init__(self, name):
@@ -16,16 +17,9 @@ class GisDB:
         self.address_model = models.Address
         self.parcel_model = models.Parcel
 
-    def get_address_feature(self, street_str, address_model=None):
-        if address_model is None:
-            address_model = self.address_model
-        full_address = Replace(Concat('number', V(' '), 'street_name', V(' '), 'street_sfx'), V('  '), V(' '))
-        address_set = address_model.objects.annotate(full_address=full_address)
-        query = address_set.filter(full_address__iexact=street_str)
-        if len(query) > 0:
-            return query[0]
-        else:
-            return None
+    def get_address_feature(self, street_str, sql_table):
+        fields = []
+        return db.pg_concat_find_one(sql_table, street_str, fields)
 
     def get_geometry(self, feature):
         return json.loads(feature.geometry.replace('\'', '\"'))

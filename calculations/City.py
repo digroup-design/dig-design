@@ -2,9 +2,7 @@ from shapely.geometry import Polygon, MultiPolygon, mapping, shape
 from pyproj import Proj, Transformer, CRS
 import database as db
 import simplejson as json
-"""
-An abstract class for querying an Address.
-"""
+
 FT_PER_M = 3.280839895 #for sqft per sq m, square this value
 crs_4326 = CRS.from_epsg(4326)
 crs_3857 = CRS.from_epsg(3857)
@@ -12,6 +10,7 @@ transformer = Transformer.from_crs(crs_4326, crs_4326)
 x = -121.917877047225588
 y = 37.377241996531545
 
+#TODO: Work in progress
 def transform_geometry(geometry:dict, transformer):
     geo = geometry.copy()
     def transform_coords(coords:list, transformer):
@@ -38,8 +37,9 @@ def test():
     geo_t = transform_geometry(geometry, transformer)
     print(geo_t)
 
-
-
+"""
+An abstract class for querying an Address.
+"""
 class AddressQuery:
     data = { "address": None, #may be built using street_number, street_name, street_sfx, city, etc
              "street_number": None,
@@ -82,20 +82,46 @@ class AddressQuery:
         else:
             return "N/A"
 
-"""
-static methods generally used for MongoDB-related queries
-"""
-def get_overlaps(parcel_geometry:dict, zones_query) -> list:
-    overlap_entries = []
+#zones_query is assumed to be an iterable of dict items
+def get_overlaps_all(parcel_geometry:dict, zone_table, id_field=None)->dict:
     parcel_shape = shape(parcel_geometry)
-    for z in zones_query:
-        if parcel_shape.intersects(shape(z["geometry"])): overlap_entries.append(z)
+    parcel_area = parcel_shape.area
+    fields = list(db.pg_get_fields(zone_table).keys())
+    if id_field is None or id_field not in fields:
+        if len(fields) > 1: id_field = fields[1]
+        else: id_field = fields[0]
+    id_idx = fields.index(id_field)
+    geom_idx = fields.index("geometry")
+    db.cur.execute("SELECT * FROM public.{0}".format(zone_table))
+
+    overlap_entries = {}
+    for z in db.cur:
+        geom = shape(z[geom_idx])
+        if parcel_shape.intersects(geom):
+            if z[id_idx] not in overlap_entries.keys():
+                overlap_entries[z[id_idx]] = {"data": [], "area": 0, "ratio": 0}
+            overlap_entries[z[id_idx]]['data'].append(z)
+            overlap_entries[z[id_idx]]['area'] += parcel_shape.intersection(geom).area
+            overlap_entries[z[id_idx]]['ratio'] = overlap_entries[z[id_idx]]['area'] / parcel_area
     return overlap_entries
 
-def concat_find(collection, search_term: str, fields: list):
-    concat_list = []
-    for f in fields: concat_list += ["$" + f]
-    return collection.find({"$expr": {"$regexMatch": {"input": {"$concat": concat_list},
-                                                      "regex": search_term,
-                                                      "options": "ix"}}})
+def get_overlaps_one(parcel_geometry:dict, zones_query, id_field=None)->str:
+    overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
+    max_ratio = 0
+    max_overlap = None
+    for k, v in overlap_entries.items():
+        if v["ratio"] > 0.5:
+            return k
+        elif o.ratio > max_ratio:
+            max_overlap = k
+    return max_overlap
+
+def get_overlaps_many(parcel_geometry:dict, zones_query, id_field=None, min_ratio:float=0)->dict:
+    overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
+    overlap_dict = {}
+    for k, v in overlap_entries.items():
+        if v["ratio"] >= min_ratio:
+            overlap_dict[k] = v["ratio"]
+    return overlap_dict
+
 
