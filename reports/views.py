@@ -1,7 +1,9 @@
 from reports.forms import ReportForm
 from django.shortcuts import render
 import calculations.SanDiego as SanDiego
+import calculations.SanJose as SanJose
 
+#TODO: Account for different ways to input suffixes
 ADDRESS_ABREVS = {'street': 'st',
                   'avenue': 'ave',
                   'av': 'ave',
@@ -13,12 +15,13 @@ ADDRESS_ABREVS = {'street': 'st',
 def home(request):
     template = 'reports/home.html'
 
-    output = {"has_info": False}
+    output = {}
 
     if request.method == 'POST':
         form = ReportForm(request.POST)
 
         if form.is_valid():
+            output = {"has_info": False}
             address = form['address'].value()
             city = form['city'].value().lower().strip()
 

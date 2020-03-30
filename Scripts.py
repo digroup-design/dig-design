@@ -117,3 +117,9 @@ file_list = [
     ('use regs rmx.tsv', 'use regs rmx foot.tsv'),
     ('dev regs rmx.tsv', 'dev regs rmx foot.tsv')
     ]
+
+db.cur.execute("select 1 from public.{0} where name='{1}' limit 1;".format("sandiego_zoneinfo", "RS-1-7"))
+print(db.cur.fetchone())
+
+db.cur.execute("select 1 from public.{0} where name='{1}' limit 1;".format("sandiego_zoneinfo", "AS-1-7"))
+print(db.cur.fetchone())

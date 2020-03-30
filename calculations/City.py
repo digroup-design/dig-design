@@ -37,37 +37,39 @@ def test():
     geo_t = transform_geometry(geometry, transformer)
     print(geo_t)
 
+default_data = { "address": None, #may be built using street_number, street_name, street_sfx, city, etc
+                 "street_number": None,
+                 "street_name": None,
+                 "street_sfx": None,
+                 "street_name_full": None,
+                 "city": None,
+                 "state": None,
+                 "zip": None,
+                 "city_zip": None,
+                 "apn": None,
+                 "parcel_id": None,
+                 "owner_name": None,
+                 "owner_address": None,
+                 "zone": None,
+                 "zone_info_dict": None, #dictionary containing all info pertaining to zone codes
+                 "lot_area": None,
+                 "lot_width": None,
+                 "max_density": None,
+                 "max_density_unit": None,
+                 "base_dwelling_units": None,
+                 "max_dwelling_units": None,
+                 "dwelling_area_dict": None, #dict containing FAR-related values and calculations
+                 "base_buildable_area": None,
+                 "affordable_dict": None, #dictionary containing affording housing calculations
+                 "transit_priority": None, #boolean
+                 "geometry": None #geojson dict for parcel data
+                }
 """
 An abstract class for querying an Address.
 """
 class AddressQuery:
-    data = { "address": None, #may be built using street_number, street_name, street_sfx, city, etc
-             "street_number": None,
-             "street_name": None,
-             "street_sfx": None,
-             "street_name_full": None,
-             "city": None,
-             "state": None,
-             "zip": None,
-             "city_zip": None,
-             "apn": None,
-             "parcel_id": None,
-             "owner_name": None,
-             "owner_address": None,
-             "zone": None,
-             "zone_info_dict": None, #dictionary containing all info pertaining to zone codes
-             "lot_area": None,
-             "lot_width": None,
-             "max_density": None,
-             "max_density_unit": None,
-             "base_dwelling_units": None,
-             "max_dwelling_units": None,
-             "dwelling_area_dict": None, #dict containing FAR-related values and calculations
-             "base_buildable_area": None,
-             "affordable_dict": None, #dictionary containing affording housing calculations
-             "transit_priority": None, #boolean
-             "geometry": None #geojson dict for parcel data
-            }
+    def __init__(self):
+        self.data = default_data.copy()
 
     def get(self, street_address=None, apn=None)->dict:
         """
@@ -107,17 +109,19 @@ def get_overlaps_all(parcel_geometry:dict, zone_table, id_field=None)->dict:
 
 def get_overlaps_one(parcel_geometry:dict, zones_query, id_field=None)->str:
     overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
+    if len(overlap_entries) == 0: return None
     max_ratio = 0
     max_overlap = None
     for k, v in overlap_entries.items():
         if v["ratio"] > 0.5:
             return k
-        elif o.ratio > max_ratio:
+        elif v["ratio"] > max_ratio:
             max_overlap = k
     return max_overlap
 
 def get_overlaps_many(parcel_geometry:dict, zones_query, id_field=None, min_ratio:float=0)->dict:
     overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
+    if len(overlap_entries) == 0: return None
     overlap_dict = {}
     for k, v in overlap_entries.items():
         if v["ratio"] >= min_ratio:

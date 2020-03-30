@@ -1,5 +1,4 @@
 import calculations.City as City
-import calculations.GLOBALS as GLOBALS
 import simplejson as json
 import database as db
 
