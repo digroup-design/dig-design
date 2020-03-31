@@ -1,7 +1,7 @@
 from reports.forms import ReportForm
 from django.shortcuts import render
 import calculations.SanDiego as SanDiego
-import calculations.SanJose as SanJose
+from django.http import JsonResponse
 
 #TODO: Account for different ways to input suffixes
 ADDRESS_ABREVS = {'street': 'st',
@@ -11,6 +11,21 @@ ADDRESS_ABREVS = {'street': 'st',
                   'terrace': 'ter',
                   'terr': 'ter',
                   }
+
+def send_json(request, address=None, apn=None, city="san_diego", state="ca"):
+    data = {}
+    address_query = None
+
+    if state.lower() in ["ca", "california"]:
+        if city.lower() in ["san_diego", "san diego"]:
+            address_query = SanDiego.SanDiego()
+
+    if address_query:
+        if address: data = address_query.get(street_address=address.replace("_", " "))
+        elif apn: data = address_query.get(apn=apn)
+
+    return JsonResponse(data)
+
 
 def home(request):
     template = 'reports/home.html'

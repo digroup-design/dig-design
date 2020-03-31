@@ -1,5 +1,5 @@
 Django==2.1.15
-boto3==1.12.4
+djangorestframework==3.11.0
 numpy==1.18.1
 Shapely==1.7.0
 simplejson==3.17.0
@@ -12,6 +12,7 @@ django-storages==1.9.1
 django-admin==2.0.0
 django-excel-response2==2.0.8
 django-six==1.0.4
+boto3==1.12.4
 pytz==2019.3
 screen==1.0.1
 sqlparse==0.3.0

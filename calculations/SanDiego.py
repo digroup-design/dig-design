@@ -305,8 +305,8 @@ class SanDiego(City.AddressQuery):
                                                                                               "own_name2",
                                                                                               "own_name3"]])))
             self.data["owner_address"] = "\n".join(list(filter(None, [data_feature[o] for o in ["own_addr1", "own_addr2",
-                                                                                                  "own_addr3", "own_addr4",
-                                                                                                  "own_zip"]])))
+                                                                                                "own_addr3", "own_addr4",
+                                                                                                "own_zip"]])))
             self.data["geometry"] = data_feature["geometry"]
             self.data["lot_area"] = data_feature["shape_star"]
             print("Getting Zoning data")
@@ -344,7 +344,6 @@ class SanDiego(City.AddressQuery):
                     self.data["dwelling_area_dict"] = self.san_diego_calc.get_dwelling_area_dict(self.data["zone"],
                                                                                                  self.data["lot_area"])
                     if self.data["dwelling_area_dict"]:  # assumes first entry is max dwelling area
-                        self.data["base_buildable_area"] = self.data["dwelling_area_dict"][list(self.data["dwelling_area_dict"].keys())[0]]['area']
-
-
+                        self.data["base_buildable_area"] = self.data["dwelling_area_dict"]\
+                            [list(self.data["dwelling_area_dict"].keys())[0]]['area']
         return self.data
