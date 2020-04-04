@@ -1,77 +1,72 @@
 from shapely.geometry import Polygon, MultiPolygon, mapping, shape
-from pyproj import Proj, Transformer, CRS
+from pyproj import Proj, Transformer, CRS, transform
 import database as db
-import simplejson as json
+import copy
 
 FT_PER_M = 3.280839895 #for sqft per sq m, square this value
-crs_4326 = CRS.from_epsg(4326)
-crs_3857 = CRS.from_epsg(3857)
-transformer = Transformer.from_crs(crs_4326, crs_4326)
-x = -121.917877047225588
-y = 37.377241996531545
 
-#TODO: Work in progress
-def transform_geometry(geometry:dict, transformer):
-    geo = geometry.copy()
-    def transform_coords(coords:list, transformer):
+def transform_geometry(geometry:dict, in_proj='epsg:4326', out_proj='epsg:3857'):
+    inproj = Proj(in_proj)
+    outproj = Proj(out_proj)
+    def transform_coords(coords:list):
         if len(coords) == 0:
             return []
         elif isinstance(coords[0], float) or isinstance(coords[0], int):
             if len(coords) == 2:
-                return transformer.transform(coords[0], coords[1])
+                return transform(inproj, outproj, coords[0], coords[1], always_xy=True)
             elif len(coords) == 3:
-                return transformer.transform(coords[0], coords[1], coords[2])
+                return transform(inproj, outproj, coords[0], coords[1], coords[2], always_xy=True)
             else:
-                return transformer.transform(coords[0], coords[1], coords[2], coords[3])
+                return transform(inproj, outproj, coords[0], coords[1], coords[2], coords[3], always_xy=True)
         else:
             for i in range(0, len(coords)):
-                coords[i] = transform_coords(coords[i], transformer)
+                coords[i] = transform_coords(coords[i])
             return coords
 
-    geo["coordinates"] = transform_coords(geo["coordinates"], transformer)
+    geo = copy.deepcopy(geometry)
+    geo["coordinates"] = transform_coords(geo["coordinates"])
     return geo
 
-def test():
-    parcel_feature = db.pg_find_one("sanjose_parcels", {})
-    geometry = json.loads(str(parcel_feature["geometry"]).replace("'", '"'))
-    geo_t = transform_geometry(geometry, transformer)
-    print(geo_t)
+def area(geometry:dict):
+    return shape(geometry).area
 
-default_data = { "address": None, #may be built using street_number, street_name, street_sfx, city, etc
-                 "street_number": None,
-                 "street_name": None,
-                 "street_sfx": None,
-                 "street_name_full": None,
-                 "city": None,
-                 "state": None,
-                 "zip": None,
-                 "city_zip": None,
-                 "apn": None,
-                 "parcel_id": None,
-                 "owner_name": None,
-                 "owner_address": None,
-                 "zone": None,
-                 "zone_info_dict": None, #dictionary containing all info pertaining to zone codes
-                 "lot_area": None,
-                 "lot_width": None,
-                 "max_density": None,
-                 "max_density_unit": None,
-                 "base_dwelling_units": None,
-                 "max_dwelling_units": None,
-                 "dwelling_area_dict": None, #dict containing FAR-related values and calculations
-                 "base_buildable_area": None,
-                 "affordable_dict": None, #dictionary containing affording housing calculations
-                 "transit_priority": None, #boolean
-                 "geometry": None #geojson dict for parcel data
-                }
+default_data = {
+    "address": None, #may be built using street_number, street_name, street_sfx, city, etc
+    "street_number": None,
+    "street_name": None,
+    "street_sfx": None,
+    "street_name_full": None,
+    "city": None,
+    "state": None,
+    "zip": None,
+    "city_zip": None,
+    "apn": None,
+    "parcel_id": None,
+    "owner_name": None,
+    "owner_address": None,
+    "zone": None,
+    "zone_info_dict": None, #dictionary containing all info pertaining to zone codes
+    "lot_area": None,
+    "lot_width": None,
+    "max_density": None,
+    "max_density_unit": None,
+    "base_dwelling_units": None,
+    "max_dwelling_units": None,
+    "dwelling_area_dict": None, #dict containing FAR-related values and calculations
+    "base_buildable_area": None,
+    "affordable_dict": None, #dictionary containing affording housing calculations
+    "transit_priority": None, #boolean
+    "geometry": None #geojson dict for parcel data
+}
+
 """
 An abstract class for querying an Address.
 """
 class AddressQuery:
     def __init__(self):
-        self.data = default_data.copy()
+        self.data = copy.deepcopy(default_data)
 
-    def get(self, street_address=None, apn=None)->dict:
+    def get(self, address=None, apn=None)->dict:
         """
         takes either address or apn and loads the data dict accordingly,
         :return data
@@ -99,6 +94,7 @@ def get_overlaps_all(parcel_geometry:dict, zone_table, id_field=None)->dict:
     overlap_entries = {}
     for z in db.cur:
         geom = shape(z[geom_idx])
+        #print(z[id_idx])  # DEBUG
         if parcel_shape.intersects(geom):
             if z[id_idx] not in overlap_entries.keys():
                 overlap_entries[z[id_idx]] = {"data": [], "area": 0, "ratio": 0}

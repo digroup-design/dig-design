@@ -2,14 +2,11 @@
 This module only exists to execute one-time scripts.
 Nothing here should be referenced in or executed any other modules.
 """
-
 import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 import calculations.TxtConverter as TxtConverter
 import calculations.City as City
 import database as db
-
-#export_affordable(models.SanDiego_Affordable, 'very low income.txt', 'low income.txt', 'moderate income.txt')
 
 def export_zone(model_class, zone_file, footnotes_file=None):
     footnotes_dict = {}
@@ -118,8 +115,10 @@ file_list = [
     ('dev regs rmx.tsv', 'dev regs rmx foot.tsv')
     ]
 
-db.cur.execute("select 1 from public.{0} where name='{1}' limit 1;".format("sandiego_zoneinfo", "RS-1-7"))
-print(db.cur.fetchone())
-
-db.cur.execute("select 1 from public.{0} where name='{1}' limit 1;".format("sandiego_zoneinfo", "AS-1-7"))
-print(db.cur.fetchone())
+import calculations.SanJose as SanJose
+import calculations.SantaClara_County as SantaClara_County
+# address = "620 n 2nd st"
+# address_query = SanJose.SanJose().get(address=address)
+# print(address_query)
+# address_query_v2 = SantaClara_County.SantaClara_County().get(address=address)
+# print(address_query_v2)

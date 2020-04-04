@@ -224,6 +224,3 @@ def pg_concat_find_one(sql_table, search_term:str, fields:list, tags:str = "")->
     select = "SELECT * FROM public.{0} WHERE {1} = {2} LIMIT 1".format(sql_table, case_statement, search_term)
     cur.execute(select)
     return cur.fetchone()
-
-# geojson_to_pg("sandiego_transit_priority.geojson", "sandiego_transit_priority")
-

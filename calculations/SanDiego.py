@@ -245,11 +245,19 @@ transit_priority_table = "sandiego_transit_priority"
 zoneinfo_table = "sandiego_zoneinfo"
 affordable_table = "sandiego_affordable"
 
+city_list = ['bonita', 'fallbrook', 'warner springs', 'ocotillo', 'ramona', 'pine valley', 'san marcos',
+             'el cajon', 'la jolla', 'borrego springs', 'campo', 'pala', 'palomar mountain', 'camp pendleton',
+             'aguanga', 'cardiff', 'dulzura', 'del mar', 'san diego', 'jacumba', 'olivenhain', 'potrero',
+             'imperial beach', 'julian', 'leucadia', 'rainbow', 'san clemente', 'santee', 'coronado', 'guatay',
+             'jamul', 'tecate', 'boulevard', 'spring valley', 'carlsbad', 'national city', 'imperial bch',
+             'encinitas', 'rancho santa fe', 'cardiff by the sea', 'oceanside', 'bonsall', 'descanso',
+             'rancho sante fe', 'lakeside', 'mount laguna', 'valley center', 'santa ysabel', 'alpine', 'lemon grove',
+             'pauma valley', 'ranchita', 'solana beach', 'la mesa', 'chula vista', 'san ysidro', 'escondido', 'poway']
 class SanDiego(City.AddressQuery):
     city = "San Diego"
     san_diego_calc = Calculator(city, zoneinfo_table, affordable_table)
 
-    def get(self, street_address=None, apn=None) ->dict:
+    def get(self, address=None, apn=None) ->dict:
         affordable_minimum = 5 #TODO: don't hardcode this
 
         select_list = ["a.apn", "a.addrnmbr", "a.addrname", "a.addrsfx", "a.community", "a.addrzip", "a.parcelid",
@@ -263,9 +271,9 @@ class SanDiego(City.AddressQuery):
                      LIMIT 1;
                      """
 
-        if street_address:
-            print("Search by address: ", street_address)
-            cond = "LOWER(CONCAT_WS(' ', a.addrnmbr, a.addrname, a.addrsfx)) = LOWER('{0}')".format(street_address.strip())
+        if address:
+            print("Search by address: ", address)
+            cond = "LOWER(CONCAT_WS(' ', a.addrnmbr, a.addrname, a.addrsfx)) = LOWER('{0}')".format(address.strip())
         elif apn:
             apn = [c for c in apn if c.isdigit()]
             print("Search by APN: ", apn)
