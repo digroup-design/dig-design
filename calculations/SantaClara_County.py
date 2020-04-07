@@ -28,11 +28,11 @@ class SantaClara_County(City.AddressQuery):
         data_query = """
                      SELECT {0}
                      FROM santaclara_county_addresses a, santaclara_county_parcels p
-                     WHERE a.apn::TEXT = p.apn::TEXT AND {1}
+                     WHERE a.apn = p.apn AND {1}
                      LIMIT 1;
                      """
-        db.cur.execute(data_query.format(",".join(select_list), cond))
-        result = db.cur.fetchone()
+        self.cur.execute(data_query.format(",".join(select_list), cond))
+        result = self.cur.fetchone()
         if result:
             data_feature = {}
             for col, val in zip(select_list, result):
@@ -65,10 +65,11 @@ class SantaClara_County(City.AddressQuery):
             self.data["lot_area"] = City.shape(geo_xy).area
             self.data["lot_width"] = data_feature["shape_leng"] / data_feature["shape_area"] * self.data["lot_area"]
 
-            self.data["zone"] = City.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
+            self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
             if self.data["zone"]:
                 self.data["zone_info_dict"] = {} #TODO: Import data into db
 
                 self.data["dwelling_area_dict"] = {} #TODO: FAR calculations
-
+            self.data["assessor_map"] = "https://www.sccassessor.org/apps/ShowMapBook.aspx?apn={0}".format(
+                self.data["apn"])
         return self.data

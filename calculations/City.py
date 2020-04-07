@@ -56,6 +56,7 @@ default_data = {
     "base_buildable_area": None,
     "affordable_dict": None, #dictionary containing affording housing calculations
     "transit_priority": None, #boolean
+    "assessor_map": None,
     "geometry": None #geojson dict for parcel data
 }
 
@@ -65,6 +66,11 @@ An abstract class for querying an Address.
 class AddressQuery:
     def __init__(self):
         self.data = copy.deepcopy(default_data)
+        self.conn = db.init_conn()
+        self.cur = self.conn.cursor()
+
+    def __del__(self):
+        self.conn.close()
 
     def get(self, address=None, apn=None)->dict:
         """
@@ -80,48 +86,48 @@ class AddressQuery:
             return "N/A"
 
 #zones_query is assumed to be an iterable of dict items
-def get_overlaps_all(parcel_geometry:dict, zone_table, id_field=None)->dict:
-    parcel_shape = shape(parcel_geometry)
-    parcel_area = parcel_shape.area
-    fields = list(db.pg_get_fields(zone_table).keys())
-    if id_field is None or id_field not in fields:
-        if len(fields) > 1: id_field = fields[1]
-        else: id_field = fields[0]
-    id_idx = fields.index(id_field)
-    geom_idx = fields.index("geometry")
-    db.cur.execute("SELECT * FROM public.{0}".format(zone_table))
+    def get_overlaps_all(self, parcel_geometry:dict, zone_table, id_field=None)->dict:
+        parcel_shape = shape(parcel_geometry)
+        parcel_area = parcel_shape.area
+        fields = list(db.pg_get_fields(zone_table, cursor=self.cur).keys())
+        if id_field is None or id_field not in fields:
+            if len(fields) > 1: id_field = fields[1]
+            else: id_field = fields[0]
+        id_idx = fields.index(id_field)
+        geom_idx = fields.index("geometry")
+        self.cur.execute("SELECT * FROM public.{0}".format(zone_table))
 
-    overlap_entries = {}
-    for z in db.cur:
-        geom = shape(z[geom_idx])
-        #print(z[id_idx])  # DEBUG
-        if parcel_shape.intersects(geom):
-            if z[id_idx] not in overlap_entries.keys():
-                overlap_entries[z[id_idx]] = {"data": [], "area": 0, "ratio": 0}
-            overlap_entries[z[id_idx]]['data'].append(z)
-            overlap_entries[z[id_idx]]['area'] += parcel_shape.intersection(geom).area
-            overlap_entries[z[id_idx]]['ratio'] = overlap_entries[z[id_idx]]['area'] / parcel_area
-    return overlap_entries
+        overlap_entries = {}
+        for z in self.cur:
+            geom = shape(z[geom_idx])
+            #print(z[id_idx])  # DEBUG
+            if parcel_shape.intersects(geom):
+                if z[id_idx] not in overlap_entries.keys():
+                    overlap_entries[z[id_idx]] = {"data": [], "area": 0, "ratio": 0}
+                overlap_entries[z[id_idx]]['data'].append(z)
+                overlap_entries[z[id_idx]]['area'] += parcel_shape.intersection(geom).area
+                overlap_entries[z[id_idx]]['ratio'] = overlap_entries[z[id_idx]]['area'] / parcel_area
+        return overlap_entries
 
-def get_overlaps_one(parcel_geometry:dict, zones_query, id_field=None)->str:
-    overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
-    if len(overlap_entries) == 0: return None
-    max_ratio = 0
-    max_overlap = None
-    for k, v in overlap_entries.items():
-        if v["ratio"] > 0.5:
-            return k
-        elif v["ratio"] > max_ratio:
-            max_overlap = k
-    return max_overlap
+    def get_overlaps_one(self, parcel_geometry:dict, zones_query, id_field=None)->str:
+        overlap_entries = self.get_overlaps_all(parcel_geometry, zones_query, id_field)
+        if len(overlap_entries) == 0: return None
+        max_ratio = 0
+        max_overlap = None
+        for k, v in overlap_entries.items():
+            if v["ratio"] > 0.5:
+                return k
+            elif v["ratio"] > max_ratio:
+                max_overlap = k
+        return max_overlap
 
-def get_overlaps_many(parcel_geometry:dict, zones_query, id_field=None, min_ratio:float=0)->dict:
-    overlap_entries = get_overlaps_all(parcel_geometry, zones_query, id_field)
-    if len(overlap_entries) == 0: return None
-    overlap_dict = {}
-    for k, v in overlap_entries.items():
-        if v["ratio"] >= min_ratio:
-            overlap_dict[k] = v["ratio"]
-    return overlap_dict
+    def get_overlaps_many(self, parcel_geometry:dict, zones_query, id_field=None, min_ratio:float=0)->dict:
+        overlap_entries = self.get_overlaps_all(parcel_geometry, zones_query, id_field)
+        if len(overlap_entries) == 0: return None
+        overlap_dict = {}
+        for k, v in overlap_entries.items():
+            if v["ratio"] >= min_ratio:
+                overlap_dict[k] = v["ratio"]
+        return overlap_dict
 
 

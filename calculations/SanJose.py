@@ -23,11 +23,11 @@ class SanJose(SantaClara_County.SantaClara_County):
         data_query = """
                      SELECT {0}
                      FROM sanjose_addresses a, sanjose_parcels p
-                     WHERE a.parcelid::TEXT = p.parcelid::TEXT AND {1}
+                     WHERE a.parcelid::TEXT = p.parcelid AND {1}
                      LIMIT 1;
                      """
-        db.cur.execute(data_query.format(",".join(select_list), cond))
-        result = db.cur.fetchone()
+        self.cur.execute(data_query.format(",".join(select_list), cond))
+        result = self.cur.fetchone()
         if result:
             data_feature = {}
             for col, val in zip(select_list, result):
@@ -57,10 +57,11 @@ class SanJose(SantaClara_County.SantaClara_County):
             self.data["lot_area"] = City.shape(geo_xy).area
             self.data["lot_width"] = None #TODO
 
-            self.data["zone"] = City.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
+            self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
             if self.data["zone"]:
                 self.data["zone_info_dict"] = {} #TODO: Import data into db
 
                 self.data["dwelling_area_dict"] = {} #TODO: FAR calculations
-
+            self.data["assessor_map"] = "https://www.sccassessor.org/apps/ShowMapBook.aspx?apn={0}".format(
+                self.data["apn"])
         return self.data

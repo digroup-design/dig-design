@@ -8,8 +8,10 @@ class ZoneReader:
     def __init__(self, zone_table:str, affordable_table:str):
         self.zone_table = zone_table
         self.affordable_table = affordable_table
-        self.zone_table_fields = list(db.pg_get_fields(self.zone_table).keys())
-        self.affordable_table_fields = list(db.pg_get_fields(self.affordable_table).keys())
+        self.conn = db.init_conn()
+        self.cur = self.conn.cursor()
+        self.zone_table_fields = list(db.pg_get_fields(self.zone_table, cursor=self.cur).keys())
+        self.affordable_table_fields = list(db.pg_get_fields(self.affordable_table, cursor=self.cur).keys())
 
     '''
     zone -- string representation of the zone
@@ -17,9 +19,9 @@ class ZoneReader:
     returns the zone's object from the model database
     '''
     def get_zone(self, zone, name_col="name"):
-        db.cur.execute("SELECT * FROM public.{0} WHERE {1}".format(
+        self.cur.execute("SELECT * FROM public.{0} WHERE {1}".format(
             self.zone_table, "LOWER({1})=LOWER('{0}')".format(zone, name_col)))
-        result = db.cur.fetchone()
+        result = self.cur.fetchone()
         if result:
             return dict(zip(self.zone_table_fields, result))
         else:
@@ -68,8 +70,8 @@ class ZoneReader:
       'income level 1': ... } 
     """
     def get_affordable_dict(self):
-        db.cur.execute("SELECT * FROM public.{0}".format(self.affordable_table))
-        affordable = db.cur.fetchall()
+        self.cur.execute("SELECT * FROM public.{0}".format(self.affordable_table))
+        affordable = self.cur.fetchall()
         if len(affordable) > 0:
             affordable_dict = {}
             data_index = self.affordable_table_fields.index("data")
@@ -281,8 +283,8 @@ class SanDiego(City.AddressQuery):
         else:
             raise Exception("Must contain either street_address or apn")
 
-        db.cur.execute(data_query.format(','.join(select_list), cond))
-        result = db.cur.fetchone()
+        self.cur.execute(data_query.format(','.join(select_list), cond))
+        result = self.cur.fetchone()
         if result:
             data_feature = {}
             for col, val in zip(select_list, result):
@@ -319,12 +321,12 @@ class SanDiego(City.AddressQuery):
             self.data["lot_area"] = data_feature["shape_star"]
             print("Getting Zoning data")
 
-            self.data["zone"] = City.get_overlaps_one(self.data["geometry"], zones_table, "zone_name")
+            self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zones_table, "zone_name")
             if self.data["zone"]:
                 print(self.data["zone"])
-                db.cur.execute("SELECT 1 FROM {0} WHERE UPPER(name)=UPPER('{1}') LIMIT 1;".format(
+                self.cur.execute("SELECT 1 FROM {0} WHERE UPPER(name)=UPPER('{1}') LIMIT 1;".format(
                     zoneinfo_table, self.data["zone"]))
-                if db.cur.fetchone() is None:
+                if self.cur.fetchone() is None:
                     print("Info for {0} not available".format(self.data["zone"]))
                 else:
                     self.data["zone_info_dict"] = self.san_diego_calc.zone_reader.get_rule_dict_output(self.data["zone"])
@@ -337,7 +339,7 @@ class SanDiego(City.AddressQuery):
                         self.data["max_density_unit"] = "sf per DU"
                     self.data["base_dwelling_units"] = math.ceil(self.san_diego_calc.get_max_dwelling_units(
                         self.data["lot_area"], self.data["zone"]))
-                    self.data["transit_priority"] = len(City.get_overlaps_all(self.data["geometry"],
+                    self.data["transit_priority"] = len(self.get_overlaps_all(self.data["geometry"],
                                                                               transit_priority_table)) > 0
 
                     if self.data["base_dwelling_units"] >= affordable_minimum:
