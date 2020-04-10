@@ -1,5 +1,5 @@
 import calculations.TxtConverter as TxtConverter
-import calculations.City as City
+import calculations.AddressQuery as Q
 import database as db
 import simplejson as json
 import math
@@ -13,12 +13,16 @@ class ZoneReader:
         self.zone_table_fields = list(db.pg_get_fields(self.zone_table, cursor=self.cur).keys())
         self.affordable_table_fields = list(db.pg_get_fields(self.affordable_table, cursor=self.cur).keys())
 
-    '''
-    zone -- string representation of the zone
-    lookup_model -- model class to look into
-    returns the zone's object from the model database
-    '''
+    def __del__(self):
+        self.conn.close()
+
     def get_zone(self, zone, name_col="name"):
+        """
+        returns the zone's object from the model database
+        zone -- string representation of the zone
+        lookup_model -- model class to look into
+        """
+
         self.cur.execute("SELECT * FROM public.{0} WHERE {1}".format(
             self.zone_table, "LOWER({1})=LOWER('{0}')".format(zone, name_col)))
         result = self.cur.fetchone()
@@ -27,8 +31,10 @@ class ZoneReader:
         else:
             return None
 
-    #private function to use in get_rule_dicts.
+
     def _get_rule_dict(self, zone, lookup_col):
+        """private function to use in get_rule_dicts."""
+
         zone_info = self.get_zone(zone)
         if lookup_col.lower().startswith("dev"): rule_dict_json = zone_info['development_regs']
         else: rule_dict_json = zone_info['use_regs']
@@ -41,14 +47,14 @@ class ZoneReader:
             parent_rule_dict.update(rule_dict['rule_dict'])
             return parent_rule_dict
 
-    """
-    Returns a nested dictionary containing both the use and development regulations of zone
-    Inputs:
-        zone - string name of zone to be looked up
-        lookup_col - specify whether or return dict of 'use' or 'development' regulations
-            If omitted, will return dict containing both dicts.
-    """
     def get_rule_dicts(self, zone, lookup_col = None):
+        """
+        Returns a nested dictionary containing both the use and development regulations of zone
+        Inputs:
+            zone - string name of zone to be looked up
+            lookup_col - specify whether or return dict of 'use' or 'development' regulations
+                If omitted, will return dict containing both dicts.
+        """
         #recursive function to get rule dict for one particular kind of zone
         if lookup_col is None:
             super_rule_dict = {
@@ -62,14 +68,14 @@ class ZoneReader:
             elif lookup_col.lower().startswith("use"):
                 return self._get_rule_dict(zone, "use")
             else:
-                print("Invalid lookup_col entered. Need 'development or 'use'.")
-                return None
-    """
-    returns a dictionary containing all the affordable info for zones in the following format:
-    { 'income level 0': { [min unit %] : {'density_bonus': [density bonus %], 'incentives': [# of incentives]} },
-      'income level 1': ... } 
-    """
+                raise ValueError("Invalid lookup_col entered. Need 'development or 'use'.")
+
     def get_affordable_dict(self):
+        """
+        returns a dictionary containing all the affordable info for zones in the following format:
+        { 'income level 0': { [min unit %] : {'density_bonus': [density bonus %], 'incentives': [# of incentives]} },
+          'income level 1': ... }
+        """
         self.cur.execute("SELECT * FROM public.{0}".format(self.affordable_table))
         affordable = self.cur.fetchall()
         if len(affordable) > 0:
@@ -89,13 +95,13 @@ class ZoneReader:
         else:
             return None
 
-    """  
-    returns an attribute in zone's rule_dict based on the input rule
-        attr type must be 'category', 'rule', 'value' or 'footnotes'
-        rule_class dictates if to be searched in Use Regulations, Development regulations or unspecified
-        substr=True if rule can be a substring, else exact match required
-    """
     def get_attr_by_rule(self, zone, rule, attr_type):
+        """
+        returns an attribute in zone's rule_dict based on the input rule
+            attr type must be 'category', 'rule', 'value' or 'footnotes'
+            rule_class dictates if to be searched in Use Regulations, Development regulations or unspecified
+            substr=True if rule can be a substring, else exact match required
+        """
         attr_type = attr_type.lower()
         if attr_type in ['class', 'category', 'rule', 'value', 'footnotes']:
             rule_dict = self.get_rule_dicts(zone)
@@ -107,13 +113,10 @@ class ZoneReader:
                         else:
                             return v_sub[attr_type]
         else:
-            print("Invalid attribute - select from [class, category, rule, value, footnotes]")
-            return None
+            raise ValueError("Invalid attr_type - select from [class, category, rule, value, footnotes]")
 
-    """
-    returns a nested dictionary to be used by views.py
-    """
     def get_rule_dict_output(self, zone):
+        """returns a nested dictionary for output use"""
         output_dict = {}
         rule_dicts = self.get_rule_dicts(zone)
         rule_dict_working = {}
@@ -143,11 +146,11 @@ class ZoneReader:
 
         return output_dict
 
-"""
-Calculator is to be used as an abstract class for all Calculators. All methods are tested to work
-for San Diego, but for other cities, should be overridden accordingly if their structure is different
-"""
 class Calculator:
+    """
+    Calculator is to be used as an abstract class for all Calculators. All methods are tested to work
+    for San Diego, but for other cities, should be overridden accordingly if their structure is different
+    """
     #the name of the Calculator is the city, and tells the program where all the data is found within the directory
     def __init__(self, name, zoneinfo_table, affordable_table):
         self.name = name
@@ -162,24 +165,20 @@ class Calculator:
         rule_value = self.zone_reader.get_attr_by_rule(zoning_code, search_term, 'value')
         if '(' in str(rule_name) and ')' in str(rule_name):
             unit = (rule_name.split('(')[-1])[0 : unit.find(')')]
-        if rule_value is not None:
+        if rule_value:
             try:
                 value = float(rule_value.replace(',', ''))
-            except: #TypeError?
+            except ValueError:
                 value = -1
 
-        if value is None:
-            return None
-        else:
-            return value, unit
+        if value: return value, unit
+        else: return None
 
     #calculates base max_dwelling units
     #generally designed to not need overriding if get_attr_by_rule works accordingly
     def get_max_dwelling_units(self, lot_size, zoning_code):
         max_density_tuple = self.get_attr_by_rule(zoning_code, 'max density')
-        print(max_density_tuple)
         if max_density_tuple is None:
-            print('No max density found')
             return -1
 
         density_unit = max_density_tuple[1].lower()
@@ -191,14 +190,15 @@ class Calculator:
                 TxtConverter.match_search(density_unit, 'square feet per'):
             return lot_size/density_value
         else:
-            print("Cannot determine units: {0}\nWill guess that it is SF/DU by default".format(density_unit))
+            # Cannot determine units, will guess that it is SF/DU by default
             return lot_size/density_value
 
-    """
-    returns a dictionary of values regarding FAR and allowable dwelling area:
-    { 'FAR-based rule' : ([FAR parameter], [calculated result]), 'FAR-based rule #2': ([FAR parameter 2], ...}
-    """
+
     def get_dwelling_area_dict(self, zone, lot_area):
+        """
+        returns a dictionary of values regarding FAR and allowable dwelling area:
+        { 'FAR-based rule' : ([FAR parameter], [calculated result]), 'FAR-based rule #2': ([FAR parameter 2], ...}
+        """
         try:
             dev_regs_dict = self.zone_reader.get_rule_dicts(zone, "development")
             floor_area_dict = {}
@@ -212,11 +212,12 @@ class Calculator:
         except ValueError:
             return None
 
-    """
-    returns a dictionary of values regarding calculations for getting maximum affordable bonus densities
-    {'very low income': (%affordable needed, %bonus density, #incentives, market-price units, affordable units, total units)...}
-    """
+
     def get_max_affordable_bonus_dict(self, base_units, transit_priority = False):
+        """
+        returns a dictionary of values regarding calculations for getting maximum affordable bonus densities
+        {'very low income': (%affordable needed, %bonus density, #incentives, market-price units, affordable units, total units)...}
+        """
         affordable_bonus_dict = {}
         for k, v in self.affordable_dict.items(): #v is a dictionary for each of the income levels
             affordable_percent = max(v.keys())
@@ -255,11 +256,13 @@ city_list = ['bonita', 'fallbrook', 'warner springs', 'ocotillo', 'ramona', 'pin
              'encinitas', 'rancho santa fe', 'cardiff by the sea', 'oceanside', 'bonsall', 'descanso',
              'rancho sante fe', 'lakeside', 'mount laguna', 'valley center', 'santa ysabel', 'alpine', 'lemon grove',
              'pauma valley', 'ranchita', 'solana beach', 'la mesa', 'chula vista', 'san ysidro', 'escondido', 'poway']
-class SanDiego(City.AddressQuery):
+
+class SanDiego(Q.AddressQuery):
     city = "San Diego"
     san_diego_calc = Calculator(city, zoneinfo_table, affordable_table)
 
-    def get(self, address=None, apn=None) ->dict:
+    def get(self, address=None, apn=None, city=None, state=None) ->dict:
+        """param city and state are not used for this class"""
         affordable_minimum = 5 #TODO: don't hardcode this
 
         select_list = ["a.apn", "a.addrnmbr", "a.addrname", "a.addrsfx", "a.community", "a.addrzip", "a.parcelid",
@@ -272,16 +275,13 @@ class SanDiego(City.AddressQuery):
                      WHERE a.parcelid = p.parcelid AND {1}
                      LIMIT 1;
                      """
-
         if address:
-            print("Search by address: ", address)
-            cond = "LOWER(CONCAT_WS(' ', a.addrnmbr, a.addrname, a.addrsfx)) = LOWER('{0}')".format(address.strip())
+            cond = "UPPER(CONCAT_WS(' ', a.addrnmbr, a.addrname, a.addrsfx)) = UPPER('{0}')".format(address.strip())
         elif apn:
-            apn = [c for c in apn if c.isdigit()]
-            print("Search by APN: ", apn)
+            apn = Q.digits_only(apn)
             cond = "a.apn = '{0}'".format(apn)
         else:
-            raise Exception("Must contain either street_address or apn")
+            raise TypeError("Query requires either address or apn")
 
         self.cur.execute(data_query.format(','.join(select_list), cond))
         result = self.cur.fetchone()
@@ -291,7 +291,6 @@ class SanDiego(City.AddressQuery):
                 if '.' in col: key = col.split('.')[1]
                 else: key = col
                 data_feature[key] = val
-            print(data_feature)
 
             feature_to_sql = {"street_number": "addrnmbr",
                               "street_name": "addrname",
@@ -319,28 +318,26 @@ class SanDiego(City.AddressQuery):
                                                                                                 "own_zip"]])))
             self.data["geometry"] = data_feature["geometry"]
             self.data["lot_area"] = data_feature["shape_star"]
-            print("Getting Zoning data")
 
             self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zones_table, "zone_name")
             if self.data["zone"]:
-                print(self.data["zone"])
                 self.cur.execute("SELECT 1 FROM {0} WHERE UPPER(name)=UPPER('{1}') LIMIT 1;".format(
                     zoneinfo_table, self.data["zone"]))
-                if self.cur.fetchone() is None:
-                    print("Info for {0} not available".format(self.data["zone"]))
-                else:
+                if self.cur.fetchone():
                     self.data["zone_info_dict"] = self.san_diego_calc.zone_reader.get_rule_dict_output(self.data["zone"])
 
                     max_density = self.san_diego_calc.get_attr_by_rule(self.data["zone"], 'max density')
                     self.data["max_density"] = max_density[0]
-                    if len(max_density) > 1 and max_density[1] not in [None, '']:
+                    if len(max_density) > 1 and max_density[1]:
                         self.data["max_density_unit"] = max_density[1]
                     else:
                         self.data["max_density_unit"] = "sf per DU"
                     self.data["base_dwelling_units"] = math.ceil(self.san_diego_calc.get_max_dwelling_units(
                         self.data["lot_area"], self.data["zone"]))
+
                     self.data["transit_priority"] = len(self.get_overlaps_all(self.data["geometry"],
-                                                                              transit_priority_table)) > 0
+                                                                              transit_priority_table,
+                                                                              "name")) > 0
 
                     if self.data["base_dwelling_units"] >= affordable_minimum:
                         self.data["affordable_dict"] = self.san_diego_calc.get_max_affordable_bonus_dict(

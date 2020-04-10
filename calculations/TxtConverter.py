@@ -1,15 +1,15 @@
 import numpy
 import re
-# This module handles all the conversions of txt to arrays that will be read by the CodeTree
 
-"""
-Converts a tab-delimited stream into a 2-d array 
-inputs:
-    text - an opened file to be translated into the tree
-    transpose - if True, converts rows to columns and vice versa
-    char_strip - list of characters to remove from array
-"""
 def txt_to_array(text, transpose=False, char_strip=[]):
+    """
+    Converts a tab-delimited stream into a 2-d array
+    inputs:
+        text - an opened file to be translated into the tree
+        transpose - if True, converts rows to columns and vice versa
+        char_strip - list of characters to remove from array
+    """
+
     array = []
     for r in text:
         row_split = r.split('\t')
@@ -23,14 +23,15 @@ def txt_to_array(text, transpose=False, char_strip=[]):
     if transpose: return numpy.transpose(array)
     else: return array
 
-"""
-takes an entry_array and rules_array and outputs into a tuple:
-    ((rule, category, rule_footnote), (value, value_footnote))
-both inputs have to be more than length 1 and equal length
-entry_array[0] must be the zone code, rules_array[0] is ignored ignored
-rule class is the broad classification of rules - i.e. Development Regulations vs Use Regulations
-"""
 def rules_to_dictionary(rules_array, value_array, rule_class=''):
+    """
+    takes an entry_array and rules_array and outputs into a tuple:
+        ((rule, category, rule_footnote), (value, value_footnote))
+    both inputs have to be more than length 1 and equal length
+    entry_array[0] must be the zone code, rules_array[0] is ignored ignored
+    rule class is the broad classification of rules - i.e. Development Regulations vs Use Regulations
+    """
+
     dictionary = {}
     for i in range(1, len(value_array)):
         category = ''

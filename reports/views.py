@@ -2,10 +2,7 @@ from reports.forms import ReportForm
 from django.shortcuts import render
 from django.http import JsonResponse
 import simplejson as json
-
-import calculations.SanDiego as SanDiego
-import calculations.SanJose as SanJose
-import calculations.SantaClara_County as SantaClara_County
+from calculations.AddressQueryFactory import AddressQueryFactory
 
 #TODO: Account for different ways to input suffixes
 ADDRESS_ABREVS = {'street': 'st',
@@ -19,29 +16,15 @@ ADDRESS_ABREVS = {'street': 'st',
 def send_json(request, address=None, apn=None, city="san diego", state="ca"):
     #TODO: url fields should allow spaces, but do not due to URL restrictions.
     # Should figure out work-around using %20 or regex
-
     if address: address = address.replace("_", " ")
-    if apn: apn = apn.replace("_", " ")
+    elif apn: apn = apn.replace("_", " ")
     city = city.replace("_", " ")
     state = state.replace("_", " ")
 
-    data = {}
-    address_query = None
-
-    if state.lower() in ["ca", "california"]:
-        if city.lower() in SanDiego.city_list:
-            address_query = SanDiego.SanDiego()
-        elif city.lower() == "san jose":
-            address_query = SanJose.SanJose()
-        elif city.upper() in SantaClara_County.city_list:
-            address_query = SantaClara_County.SantaClara_County()
-
-    if address_query:
-        if address: data = address_query.get(address=address)
-        elif apn: data = address_query.get(apn=apn)
-
+    q = AddressQueryFactory()
+    data = q.get(city, state, address=address, apn=apn)
+    print(q)
     return JsonResponse(data)
-
 
 def home(request):
     template = 'reports/home.html'
@@ -61,7 +44,6 @@ def home(request):
             else:
                 output["has_info"] = True
                 output.update(json_data)
-                print(output)
 
     else:
         form = ReportForm()

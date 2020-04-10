@@ -5,8 +5,9 @@ Nothing here should be referenced in or executed any other modules.
 import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 import calculations.TxtConverter as TxtConverter
-import calculations.City as City
+from calculations.AddressQueryFactory import AddressQueryFactory
 import database as db
+from time import time
 
 def export_zone(model_class, zone_file, footnotes_file=None):
     footnotes_dict = {}
@@ -115,10 +116,13 @@ file_list = [
     ('dev regs rmx.tsv', 'dev regs rmx foot.tsv')
     ]
 
-import calculations.SanJose as SanJose
-import calculations.SantaClara_County as SantaClara_County
-# address = "620 n 2nd st"
-# address_query = SanJose.SanJose().get(address=address)
-# print(address_query)
-# address_query_v2 = SantaClara_County.SantaClara_County().get(address=address)
-# print(address_query_v2)
+import calculations.AddressQuery as AddressQuery
+
+apn = "5330630700"
+address = "2405 union st"
+
+q = AddressQueryFactory()
+q.get("san diego", "ca", address=address)
+print(q)
+q.get("san diego", "ca", apn=apn)
+print(q)

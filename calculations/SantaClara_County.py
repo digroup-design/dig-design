@@ -1,5 +1,4 @@
-import calculations.City as City
-import database as db
+import calculations.AddressQuery as Q
 
 address_table = "santaclara_county_addresses"
 parcel_table = "santaclara_county_parcels"
@@ -12,16 +11,18 @@ city_list = ['SAN JOSE', 'STANFORD', 'LOS ALTOS', 'LIVERMORE', 'PALO ALTO', 'ALV
              'REDWOOD ESTATES', 'GILROY', 'LOS GATOS', 'LOS ALTOS HILLS', 'PORTOLA VALLEY',
              'SARATOGA', 'MILPITAS', 'SUNNYVALE', 'COYOTE', 'CUPERTINO', 'MONTE SERENO']
 
-class SantaClara_County(City.AddressQuery):
-    def get(self, address=None, apn=None)->dict:
+class SantaClara_County(Q.AddressQuery):
+    def get(self, address=None, apn=None, city=None, state=None)->dict:
+        """param city and state are not used for this class"""
+
         if address:
-            cond = "LOWER(CONCAT_WS(' ', a.housenumte, a.streetpref, a.streetname, a.streettype, a.streetsuff))\
-             = LOWER('{0}')".format(address.strip())
+            cond = "UPPER(CONCAT_WS(' ', a.housenumte, a.streetpref, a.streetname, a.streettype, a.streetsuff))\
+             = UPPER('{0}')".format(address.strip())
         elif apn:
-            apn = ''.join([c for c in apn if c.isdigit()])
+            apn = Q.digits_only(apn)
             cond = "p.apn = '{0}'".format(apn)
         else:
-            raise Exception("Query needs either street_address or apn")
+            raise TypeError("Query requires either address or apn")
 
         select_list = ["a.city", "a.housenumte", "a.streetname", "a.streetpref", "a.streetsuff", "a.streettype",
                        "a.unitnumber", "a.zipcode", "p.apn", "p.shape_area", "p.shape_leng", "p.geometry"]
@@ -61,8 +62,8 @@ class SantaClara_County(City.AddressQuery):
             self.data["address"] = ", ".join([self.data["street_name_full"], self.data["city_zip"]])
             self.data["geometry"] = data_feature["geometry"]
 
-            geo_xy = City.transform_geometry(self.data["geometry"], out_proj=EPSG_102643)
-            self.data["lot_area"] = City.shape(geo_xy).area
+            geo_xy = Q.transform_geometry(self.data["geometry"], out_proj=EPSG_102643)
+            self.data["lot_area"] = Q.area(geo_xy)
             self.data["lot_width"] = data_feature["shape_leng"] / data_feature["shape_area"] * self.data["lot_area"]
 
             self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
