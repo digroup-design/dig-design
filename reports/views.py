@@ -4,18 +4,9 @@ from django.http import JsonResponse
 import simplejson as json
 from calculations.AddressQueryFactory import AddressQueryFactory
 
-#TODO: Account for different ways to input suffixes
-ADDRESS_ABREVS = {'street': 'st',
-                  'avenue': 'ave',
-                  'av': 'ave',
-                  'boulevard': 'blvd',
-                  'terrace': 'ter',
-                  'terr': 'ter',
-                  }
-
 def send_json(request, address=None, apn=None, city="san diego", state="ca"):
     #TODO: url fields should allow spaces, but do not due to URL restrictions.
-    # Should figure out work-around using %20 or regex
+    #   Should figure out work-around using %20 or regex
     if address: address = address.replace("_", " ")
     elif apn: apn = apn.replace("_", " ")
     city = city.replace("_", " ")

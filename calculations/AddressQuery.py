@@ -105,7 +105,6 @@ class AddressQuery:
         overlap_entries = self.get_overlaps_all(parcel_geometry, zones_table, id_field, geom_field=geom_field)
         max_key = ''
         max_value = 0
-        print(max(overlap_entries.values()))
         for k, v in overlap_entries.items():
             if v > max_value:
                 max_key = k
@@ -134,6 +133,7 @@ class AddressQuery:
         return overlap_dict
 
 """Helper functions that may be used throughout AddressQuery objects"""
+
 def digits_only(string:str)->str:
     """Strips all non-digit character for a string. Used to format APN texts."""
     return ''.join([c for c in string if c.isdigit()])
@@ -171,4 +171,5 @@ def transform_geometry(geometry:dict, in_proj='epsg:4326', out_proj='epsg:3857')
     return geo
 
 def area(geometry:dict):
+    """returns the area of the geospatial data geometry"""
     return shape(geometry).area
