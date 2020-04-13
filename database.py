@@ -1,11 +1,8 @@
 import simplejson as json
 import psycopg2 as pg
+from dig.settings import DATABASES
 
-postgres = {'NAME': 'geojson',
-            'PASSWORD': 'WIrqJruyTSAC8QSIxpTY',
-            'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
-            'USER': 'postgres',
-            'PORT': '5432'}
+"""Handles the implementation of Postgres package psycopg2 for use in other modules"""
 
 def _feature_to_dict(line:str)->dict:
     """checks if a line in a geojson file is a feature to be entered into database"""
@@ -17,12 +14,14 @@ def _feature_to_dict(line:str)->dict:
 
 def init_conn():
     """Creates a connection with the SQL database, returning the connection object"""
+    postgres = DATABASES['query']
     return pg.connect(host=postgres['HOST'], database=postgres['NAME'], user=postgres['USER'],
                             password=postgres['PASSWORD'], port=postgres['PORT'])
 
 def _copy_table(sql_table):
     """move table from one database to another"""
 
+    postgres = DATABASES['default']
     pg_old = pg.connect(host=postgres['HOST'], database="DIG_geojson",
                               user=postgres['USER'], password=postgres['PASSWORD'],
                               port=postgres['PORT'])
@@ -42,7 +41,6 @@ def _copy_table(sql_table):
         pg_insert_one(sql_table, entry)
         cur.execute("COMMIT;")
     conn.close()
-
 
 def pg_get_fields(sql_table, fields:list=None, cursor=None)->dict:
     """
@@ -80,14 +78,47 @@ def pg_get_fields(sql_table, fields:list=None, cursor=None)->dict:
     return fields_type
 
 
-def _pyval_to_sql(val)->str:
+def pyval_to_sql(val)->str:
     """:returns a variable val in Python to a string for a sql query"""
 
     if val is None: return "NULL"
     elif isinstance(val, str): return "'{0}'".format(val.replace("'", "''"))
     elif isinstance(val, dict): return "'{0}'".format(json.dumps(val).replace("'", "''"))
+    # elif val.__class__ in [list, tuple, set]:
+    #     val = tuple(val)
+    #     TODO
     else: return str(val)
 
+def pytype_to_sql(val)->str:
+    """
+    :param val: a value whose type is converted to a postgreSQL datatype or
+        if val is of class type, it will be directly converted to a postgreSQL datatype
+    :returns a str represenation of val's datatype for SQL"""
+    data_map = {
+        int: "INT",
+        float: "DOUBLE PRECISION",
+        bool: "BOOL",
+        dict: "json",
+        None.__class__: "VARCHAR(1)"}
+
+    if val.__class__ in [list, tuple, set]:
+        val = tuple(val)
+        if len(val) == 0:
+            return data_map[None.__class__] + "[]"
+        else:
+            list_type_set = set([elem.__class__ for elem in val])
+            #TODO: edge case for empty tuple () -- elem to the first value that is not (), assume None if all ()
+            if len(list_type_set) == 1:
+                elem = val[0]
+            else:
+                elem = str(val[0])
+            return pytype_to_sql(elem) + "[]"
+    elif val.__class__ is not type:
+        return pytype_to_sql(val.__class__)
+    elif val in data_map.keys():
+        return data_map[val]
+    else:
+        return "TEXT"
 
 def pg_insert_one(sql_table, entry:dict, data_types=None, cursor=None)->bool:
     """
@@ -100,18 +131,6 @@ def pg_insert_one(sql_table, entry:dict, data_types=None, cursor=None)->bool:
     :return True if a change in columns was made, False if otherwise. The outside loop calling pg_insert_one will
     then know to only re-run pg_get_fields (input value for data_types) if a change in columns was made
     """
-    def _py_to_sql_type(py_value):
-        if py_value is None:
-            return "VARCHAR(1)"  # trivially assume any optional fields is a string
-        else:
-            data_map = {chr: "TEXT",
-                        str: "TEXT", #"VARCHAR({0})".format(len(str(py_value))),
-                        int: "INT",
-                        float: "DOUBLE PRECISION",
-                        bool: "BOOL",
-                        dict: "json",
-                        list: "TEXT"}
-            return data_map[py_value.__class__]
 
     if cursor:
         conn = None
@@ -126,7 +145,7 @@ def pg_insert_one(sql_table, entry:dict, data_types=None, cursor=None)->bool:
     column_change = False
     for f, v in entry.items():
         if f.lower() not in [k.lower() for k in data_types.keys()]:
-            data_type = _py_to_sql_type(v)
+            data_type = pytype_to_sql(v)
             cur.execute("ALTER TABLE {0} ADD {1} {2};".format(sql_table, f.lower(), data_type))
             column_change = True
         elif isinstance(v, str) and "CHAR" in data_types[f.lower()].upper():
@@ -134,7 +153,7 @@ def pg_insert_one(sql_table, entry:dict, data_types=None, cursor=None)->bool:
             cur.execute("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2} USING {1}::{2}".format(sql_table, f, data_type))
             column_change = True
         elif v is not None and "CHAR" in data_types[f.lower()].upper():
-            data_type = _py_to_sql_type(v)
+            data_type = pytype_to_sql(v)
             cur.execute("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2} USING {1}::{2}".format(sql_table, f, data_type))
             column_change = True
 

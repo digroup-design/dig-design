@@ -19,7 +19,6 @@ class SantaClara_County(Q.AddressQuery):
             cond = "UPPER(CONCAT_WS(' ', a.housenumte, a.streetpref, a.streetname, a.streettype, a.streetsuff))\
              = UPPER('{0}')".format(address.strip())
         elif apn:
-            apn = Q.digits_only(apn)
             cond = "p.apn = '{0}'".format(apn)
         else:
             raise TypeError("Query requires either address or apn")

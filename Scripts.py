@@ -8,6 +8,7 @@ import calculations.TxtConverter as TxtConverter
 import calculations.AddressQueryFactory as AddressQueryFactory
 from calculations.AddressQueryFactory import AddressQueryFactory as Q
 import database as db
+from time import time
 
 def export_zone(model_class, zone_file, footnotes_file=None):
     footnotes_dict = {}
@@ -117,11 +118,20 @@ file_list = [
     ]
 
 
-apn = "5330630700"
-address = "2405 union st"
+# import calculations.InputValidate as V
+# start = time()
+# res = V.autofill_list("2405 union", "sandiego_addresses", "full_addr", "apn")
+# end = time()
+# print(res)
+# print(end - start)
 
-test_list = ["2405 union street", "2405 union st", "4442 ocean view boulevard", "4442 ocean view blvd"]
-q = Q()
-for t in test_list:
-    t2 = q.get("san diego", "ca", t)
-    print(q)
+empty_tuple = ()
+print(empty_tuple is None)
+print(empty_tuple == ())
+
+print(tuple([]))
+print(int.__class__ is type)
+print(str(int))
+val_list = [None.__class__, None, 'i', "string", True, 1, 1.0, 1j, {"Hello": "World"}, [[1, 2], [2, 4], [3, 6]], {1, 2, 3}, [], ("Tu", "Pl")]
+for val in val_list:
+    print(val, db.pytype_to_sql(val))

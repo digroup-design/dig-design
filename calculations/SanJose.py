@@ -13,7 +13,6 @@ class SanJose(SantaClara_County.SantaClara_County):
         if address:
             cond = "UPPER(a.fulladdres) = UPPER('{0}')".format(address.strip())
         elif apn:
-            apn = Q.digits_only(apn)
             cond = "p.apn = '{0}'".format(apn)
         else:
             raise TypeError("Query requires either address or apn")

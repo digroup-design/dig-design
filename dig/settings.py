@@ -80,6 +80,13 @@ DATABASES = {
         'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
         'USER': 'postgres',
         'PORT': '5432'
+    },
+    'query': {
+        'NAME': 'geojson',
+        'PASSWORD': 'WIrqJruyTSAC8QSIxpTY',
+        'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
+        'USER': 'postgres',
+        'PORT': '5432'
     }
 }
 

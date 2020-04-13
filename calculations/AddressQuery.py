@@ -133,11 +133,6 @@ class AddressQuery:
         return overlap_dict
 
 """Helper functions that may be used throughout AddressQuery objects"""
-
-def digits_only(string:str)->str:
-    """Strips all non-digit character for a string. Used to format APN texts."""
-    return ''.join([c for c in string if c.isdigit()])
-
 FT_PER_M = 3.280839895 #for sqft per sq m, square this value
 
 def transform_geometry(geometry:dict, in_proj='epsg:4326', out_proj='epsg:3857'):
