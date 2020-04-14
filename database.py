@@ -159,7 +159,7 @@ def pg_insert_one(sql_table, entry:dict, data_types=None, cursor=None)->bool:
 
     insert = "insert into {0} ({1}) values ({2});".format(sql_table,
                                                           ",".join([f for f in entry.keys()]),
-                                                          ",".join([_pyval_to_sql(v) for v in entry.values()]))
+                                                          ",".join([pyval_to_sql(v) for v in entry.values()]))
     cur.execute(insert)
     if conn: conn.close()
 

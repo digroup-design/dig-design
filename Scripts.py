@@ -125,13 +125,45 @@ file_list = [
 # print(res)
 # print(end - start)
 
-empty_tuple = ()
-print(empty_tuple is None)
-print(empty_tuple == ())
+# q = Q()
+# print(q.get("san jose", "ca", '620 n 2nd st'))
+# print(q)
+#
+# santa_clara_tests = ('23029119', '23024008', '23029096')
+# for s in santa_clara_tests:
+#     print(q.get("santa clara", "ca", apn=s)['opportunity_zone'])
+#     print(q)
+#
+# print(q.get("san diego", "ca", "1401 national city blvd")['opportunity_zone'])
+# print(q)
 
-print(tuple([]))
-print(int.__class__ is type)
-print(str(int))
-val_list = [None.__class__, None, 'i', "string", True, 1, 1.0, 1j, {"Hello": "World"}, [[1, 2], [2, 4], [3, 6]], {1, 2, 3}, [], ("Tu", "Pl")]
-for val in val_list:
-    print(val, db.pytype_to_sql(val))
+# from calculations.SanDiego import SanDiego
+# sd = SanDiego()
+# cur = sd.cur
+# query = """
+#     SELECT p.apn, oz.namelsad, a.full_addr
+#     FROM public.sandiego_parcels p, public.ca_opportunity_zones oz, public.sandiego_addresses a
+#     WHERE
+#         a.full_addr = '1401 NATIONAL CITY BLVD' AND
+#         ST_Intersects(
+#             ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON({0})), {1}), {2}),
+#             ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON(oz.geometry), 4269))
+#         )
+#     LIMIT 5;
+#     """.format("p.geometry", str(4326), str(4269))
+# cur.execute(query)
+# print(cur)
+
+test_apn = (3232023900, 3136512600, 3155210101, 3151001216, 3801310400)
+q = Q()
+for a in test_apn:
+    print(q.get("san diego", "ca", apn=str(a))['opportunity_zone'])
+    print(q)
+
+
+# data = sd.get(address="2405 union st")
+# geo = data['geometry']
+# print(geo)
+# g = sd.st_transform(geo, 4326, 3857)
+# print(g)
+

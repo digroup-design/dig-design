@@ -1,86 +1,92 @@
 import calculations.TxtConverter as TxtConverter
-import calculations.AddressQuery as Q
+from calculations.AddressQuery import AddressQuery
 import simplejson as json
 import math
 
-address_table = "sandiego_addresses"
-parcels_table = "sandiego_parcels"
-zones_table = "sandiego_zones"
-transit_priority_table = "sandiego_transit_priority"
-zoneinfo_table = "sandiego_zoneinfo"
-affordable_table = "sandiego_affordable"
+class SanDiego(AddressQuery):
+    tables = {
+        "addresses": "sandiego_addresses",
+        "parcels": "sandiego_parcels",
+        "zones": "sandiego_zones",
+        "transit_priority": "sandiego_transit_priority",
+        "zone_info": "sandiego_zoneinfo",
+        "affordable": "sandiego_affordable",
+        "oz": "ca_opportunity_zones"
+    }
 
-city_list = ['bonita', 'fallbrook', 'warner springs', 'ocotillo', 'ramona', 'pine valley', 'san marcos',
-             'el cajon', 'la jolla', 'borrego springs', 'campo', 'pala', 'palomar mountain', 'camp pendleton',
-             'aguanga', 'cardiff', 'dulzura', 'del mar', 'san diego', 'jacumba', 'olivenhain', 'potrero',
-             'imperial beach', 'julian', 'leucadia', 'rainbow', 'san clemente', 'santee', 'coronado', 'guatay',
-             'jamul', 'tecate', 'boulevard', 'spring valley', 'carlsbad', 'national city', 'imperial bch',
-             'encinitas', 'rancho santa fe', 'cardiff by the sea', 'oceanside', 'bonsall', 'descanso',
-             'rancho sante fe', 'lakeside', 'mount laguna', 'valley center', 'santa ysabel', 'alpine', 'lemon grove',
-             'pauma valley', 'ranchita', 'solana beach', 'la mesa', 'chula vista', 'san ysidro', 'escondido', 'poway']
+    city_list = ('bonita', 'fallbrook', 'warner springs', 'ocotillo', 'ramona', 'pine valley', 'san marcos',
+                 'el cajon', 'la jolla', 'borrego springs', 'campo', 'pala', 'palomar mountain', 'camp pendleton',
+                 'aguanga', 'cardiff', 'dulzura', 'del mar', 'san diego', 'jacumba', 'olivenhain', 'potrero',
+                 'imperial beach', 'julian', 'leucadia', 'rainbow', 'san clemente', 'santee', 'coronado', 'guatay',
+                 'jamul', 'tecate', 'boulevard', 'spring valley', 'carlsbad', 'national city', 'imperial bch',
+                 'encinitas', 'rancho santa fe', 'cardiff by the sea', 'oceanside', 'bonsall', 'descanso',
+                 'rancho sante fe', 'lakeside', 'mount laguna', 'valley center', 'santa ysabel', 'alpine',
+                 'lemon grove',
+                 'pauma valley', 'ranchita', 'solana beach', 'la mesa', 'chula vista', 'san ysidro', 'escondido',
+                 'poway')
 
-class SanDiego(Q.AddressQuery):
     def get(self, address=None, apn=None, city=None, state=None) ->dict:
         """param city and state are not used for this class"""
         affordable_minimum = 5 #TODO: don't hardcode this
 
-        select_list = ["a.apn", "a.addrnmbr", "a.addrname", "a.addrsfx", "a.community", "a.addrzip", "a.parcelid",
-                       "p.own_name1", "p.own_name2", "p.own_name3", "p.own_addr1", "p.own_addr2", "p.own_addr3",
-                       "p.own_addr4", "p.own_zip", "p.shape_star", "p.shape_stle", "p.geometry",
-                       "p.legldesc", "p.asr_land", "p.asr_impr"]
-        data_query = """
-                     SELECT {0}
-                     FROM sandiego_addresses a, sandiego_parcels p
-                     WHERE a.parcelid = p.parcelid AND {1}
-                     LIMIT 1;
-                     """
         if address:
-            cond = "UPPER(CONCAT_WS(' ', a.addrnmbr, a.addrname, a.addrsfx)) = UPPER('{0}')".format(address.strip())
+            cond = "a.full_addr = UPPER('{0}')".format(address.strip())
         elif apn:
             cond = "a.apn = '{0}'".format(apn)
         else:
             raise TypeError("Query requires either address or apn")
 
-        self.cur.execute(data_query.format(','.join(select_list), cond))
+        select_fields = ("a.apn", "a.addrnmbr", "a.addrname", "a.addrsfx", "a.community", "a.addrzip", "a.parcelid",
+                       "p.own_name1", "p.own_name2", "p.own_name3", "p.own_addr1", "p.own_addr2", "p.own_addr3",
+                       "p.own_addr4", "p.own_zip", "p.shape_star", "p.shape_stle", "p.geometry",
+                       "p.legldesc", "p.asr_land", "p.asr_impr", "a.full_addr")
+        tables = SanDiego.tables
+        data_query = """
+                     SELECT {0}
+                     FROM {2} a, {3} p
+                     WHERE a.parcelid = p.parcelid AND {1}
+                     LIMIT 1;
+                     """.format(','.join(select_fields), cond, tables["addresses"], tables["parcels"])
+
+        self.cur.execute(data_query)
         result = self.cur.fetchone()
         if result:
             data_feature = {}
-            for col, val in zip(select_list, result):
+            for col, val in zip(select_fields, result):
                 if '.' in col: key = col.split('.')[1]
                 else: key = col
                 data_feature[key] = val
 
-            feature_to_sql = {"street_number": "addrnmbr",
-                              "street_name": "addrname",
-                              "street_sfx": "addrsfx",
-                              "city": "community",
-                              "zip": "addrzip",
-                              "parcel_id": "parcelid",
-                              "apn": "apn"}
+            feature_to_sql = {
+                "street_number": "addrnmbr",
+                "street_name": "addrname",
+                "street_sfx": "addrsfx",
+                "city": "community",
+                "zip": "addrzip",
+                "parcel_id": "parcelid",
+                "apn": "apn",
+                "street_name_full": "full_addr"
+            }
+            owner_name_fields = ("own_name1", "own_name2", "own_name3")
+            owner_addr_fields = ("own_addr1", "own_addr2", "own_addr3", "own_addr4", "own_zip")
+
             for f, s in feature_to_sql.items():
                 self.data[f] = data_feature[s]
                 if isinstance(self.data[f], float): self.data[f] = int(self.data[f])
                 if self.data[f]: self.data[f] = str(self.data[f]).title()
 
-            self.data["street_name_full"] = " ".join([self.data["street_number"], self.data["street_name"],
-                                                      self.data["street_sfx"]])
             self.data["state"] = "CA"
             self.data["city_zip"] = " ".join([self.data["city"].title() + ",", self.data["state"], self.data["zip"]])
             self.data["address"] = " ".join([self.data["street_name_full"], self.data["city_zip"]])
-
-            self.data["owner_name"] = "\n".join(list(filter(None, [data_feature[o] for o in ["own_name1",
-                                                                                              "own_name2",
-                                                                                              "own_name3"]])))
-            self.data["owner_address"] = "\n".join(list(filter(None, [data_feature[o] for o in ["own_addr1", "own_addr2",
-                                                                                                "own_addr3", "own_addr4",
-                                                                                                "own_zip"]])))
+            self.data["owner_name"] = "\n".join(list(filter(None, [data_feature[o] for o in owner_name_fields])))
+            self.data["owner_address"] = "\n".join(list(filter(None, [data_feature[o] for o in owner_addr_fields])))
             self.data["geometry"] = data_feature["geometry"]
             self.data["lot_area"] = data_feature["shape_star"]
 
-            self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zones_table, "zone_name")
+            self.data["zone"] = self.find_intersects_one(self.data["geometry"], tables["zones"], "zone_name")
             if self.data["zone"]:
                 self.cur.execute("SELECT 1 FROM {0} WHERE UPPER(name)=UPPER('{1}') LIMIT 1;".format(
-                    zoneinfo_table, self.data["zone"]))
+                    tables["zone_info"], self.data["zone"]))
                 if self.cur.fetchone():
                     self.data["zone_info_dict"] = self._get_rule_dict_output(self.data["zone"])
 
@@ -93,8 +99,8 @@ class SanDiego(Q.AddressQuery):
                     self.data["base_dwelling_units"] = math.ceil(self._get_max_dwelling_units(
                         self.data["lot_area"], self.data["zone"]))
 
-                    self.data["transit_priority"] = len(self.get_overlaps_all(self.data["geometry"],
-                                                                              transit_priority_table,
+                    self.data["transit_priority"] = len(self.find_intersects_all(self.data["geometry"],
+                                                                              tables["transit_priority"],
                                                                               "name")) > 0
 
                     if self.data["base_dwelling_units"] >= affordable_minimum:
@@ -107,10 +113,12 @@ class SanDiego(Q.AddressQuery):
                     else:
                         self.data["max_dwelling_units"] = self.data["base_dwelling_units"]
                     self.data["dwelling_area_dict"] = self._get_dwelling_area_dict(self.data["zone"],
-                                                                                                 self.data["lot_area"])
+                                                                                   self.data["lot_area"])
                     if self.data["dwelling_area_dict"]:  # assumes first entry is max dwelling area
                         self.data["base_buildable_area"] = self.data["dwelling_area_dict"]\
                             [list(self.data["dwelling_area_dict"].keys())[0]]['area']
+            self.data["opportunity_zone"] = self.find_intersects_one(self.data["geometry"], tables["oz"], "namelsad",
+                                                                     parcel_proj=4326, zone_proj=4269)
         return self.data
 
     def _get_zone_info(self, zone, name_col="name"):
@@ -119,9 +127,10 @@ class SanDiego(Q.AddressQuery):
         zone -- string representation of the zone
         lookup_model -- model class to look into
         """
-        zone_table_fields = tuple(self.get_fields(zoneinfo_table).keys())
+        tables = SanDiego.tables
+        zone_table_fields = tuple(self.get_fields(tables["zone_info"]).keys())
         self.cur.execute("SELECT * FROM public.{0} WHERE {1}".format(
-            zoneinfo_table, "LOWER({1})=LOWER('{0}')".format(zone, name_col)))
+            tables["zone_info"], "LOWER({1})=LOWER('{0}')".format(zone, name_col)))
         result = self.cur.fetchone()
         if result:
             return dict(zip(zone_table_fields, result))
@@ -199,8 +208,6 @@ class SanDiego(Q.AddressQuery):
 
         return output_dict
 
-    # the name of the Calculator is the city, and tells the program where all the data is found within the directory
-
     def _get_attr_by_rule(self, zoning_code, search_term):
         def _get_attr(zone, rule, attr_type):
             """
@@ -240,8 +247,6 @@ class SanDiego(Q.AddressQuery):
         else:
             return None
 
-    # calculates base max_dwelling units
-    # generally designed to not need overriding if get_attr_by_rule works accordingly
     def _get_max_dwelling_units(self, lot_size, zoning_code):
         max_density_tuple = self._get_attr_by_rule(zoning_code, 'max density')
         if max_density_tuple is None:
@@ -284,8 +289,9 @@ class SanDiego(Q.AddressQuery):
         { 'income level 0': { [min unit %] : {'density_bonus': [density bonus %], 'incentives': [# of incentives]} },
           'income level 1': ... }
         """
-        affordable_table_fields = tuple(self.get_fields(affordable_table).keys())
-        self.cur.execute("SELECT * FROM public.{0}".format(affordable_table))
+        tables = SanDiego.tables
+        affordable_table_fields = tuple(self.get_fields(tables["affordable"]).keys())
+        self.cur.execute("SELECT * FROM public.{0}".format(tables["affordable"]))
         affordable = self.cur.fetchall()
         if len(affordable) > 0:
             affordable_dict = {}

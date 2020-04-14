@@ -1,17 +1,18 @@
-import calculations.AddressQuery as Q
+from calculations.AddressQuery import AddressQuery, area
 
-address_table = "santaclara_county_addresses"
-parcel_table = "santaclara_county_parcels"
-zone_table = "santaclara_county_zones"
-EPSG_102643 = '+proj=lcc +lat_1=37.06666666666667 +lat_2=38.43333333333333\
- +lat_0=36.5 +lon_0=-120.5 +x_0=2000000 +y_0=500000.0000000002 +datum=NAD83 +units=us-ft +no_defs'
+class SantaClara_County(AddressQuery):
+    tables = {
+        "addresses": "santaclara_county_addresses",
+        "parcels": "santaclara_county_parcels",
+        "zones": "santaclara_county_zones",
+        "oz": "ca_opportunity_zones"
+    }
 
-city_list = ['SAN JOSE', 'STANFORD', 'LOS ALTOS', 'LIVERMORE', 'PALO ALTO', 'ALVISO',
-             'CAMPBELL', 'SAN MARTIN', 'MOUNTAIN VIEW', 'SANTA CLARA', 'MORGAN HILL',
-             'REDWOOD ESTATES', 'GILROY', 'LOS GATOS', 'LOS ALTOS HILLS', 'PORTOLA VALLEY',
-             'SARATOGA', 'MILPITAS', 'SUNNYVALE', 'COYOTE', 'CUPERTINO', 'MONTE SERENO']
+    city_list = ('SAN JOSE', 'STANFORD', 'LOS ALTOS', 'LIVERMORE', 'PALO ALTO', 'ALVISO',
+                 'CAMPBELL', 'SAN MARTIN', 'MOUNTAIN VIEW', 'SANTA CLARA', 'MORGAN HILL',
+                 'REDWOOD ESTATES', 'GILROY', 'LOS GATOS', 'LOS ALTOS HILLS', 'PORTOLA VALLEY',
+                 'SARATOGA', 'MILPITAS', 'SUNNYVALE', 'COYOTE', 'CUPERTINO', 'MONTE SERENO')
 
-class SantaClara_County(Q.AddressQuery):
     def get(self, address=None, apn=None, city=None, state=None)->dict:
         """param city and state are not used for this class"""
 
@@ -23,19 +24,20 @@ class SantaClara_County(Q.AddressQuery):
         else:
             raise TypeError("Query requires either address or apn")
 
-        select_list = ["a.city", "a.housenumte", "a.streetname", "a.streetpref", "a.streetsuff", "a.streettype",
-                       "a.unitnumber", "a.zipcode", "p.apn", "p.shape_area", "p.shape_leng", "p.geometry"]
+        select_fields = ("a.city", "a.housenumte", "a.streetname", "a.streetpref", "a.streetsuff", "a.streettype",
+                         "a.unitnumber", "a.zipcode", "p.apn", "p.shape_area", "p.shape_leng", "p.geometry")
+        tables = SantaClara_County.tables
         data_query = """
                      SELECT {0}
-                     FROM santaclara_county_addresses a, santaclara_county_parcels p
+                     FROM {2} a, {3} p
                      WHERE a.apn = p.apn AND {1}
                      LIMIT 1;
-                     """
-        self.cur.execute(data_query.format(",".join(select_list), cond))
+                     """.format(",".join(select_fields), cond, tables["addresses"], tables["parcels"])
+        self.cur.execute(data_query)
         result = self.cur.fetchone()
         if result:
             data_feature = {}
-            for col, val in zip(select_list, result):
+            for col, val in zip(select_fields, result):
                 if '.' in col: key = col.split('.')[1]
                 else: key = col
                 data_feature[key] = val
@@ -57,19 +59,21 @@ class SantaClara_County(Q.AddressQuery):
                                                                    data_feature['streettype'],
                                                                    data_feature['streetsuff'],])).title()
             self.data["state"] = "CA"
-            self.data["city_zip"] = " ".join([self.data["city"].title(), self.data["state"] + ",", self.data["zip"]])
+            self.data["city_zip"] = " ".join(filter(None, [self.data["city"].title(), self.data["state"] + ",", self.data["zip"]]))
             self.data["address"] = ", ".join([self.data["street_name_full"], self.data["city_zip"]])
             self.data["geometry"] = data_feature["geometry"]
 
-            geo_xy = Q.transform_geometry(self.data["geometry"], out_proj=EPSG_102643)
-            self.data["lot_area"] = Q.area(geo_xy)
+            geo_xy = self.st_transform(self.data["geometry"], out_proj=102643)
+            self.data["lot_area"] = area(geo_xy)
             self.data["lot_width"] = data_feature["shape_leng"] / data_feature["shape_area"] * self.data["lot_area"]
 
-            self.data["zone"] = self.get_overlaps_one(self.data["geometry"], zone_table, "zoning")
+            self.data["zone"] = self.find_intersects_one(self.data["geometry"], tables["zones"], "zoning")
             if self.data["zone"]:
                 self.data["zone_info_dict"] = {} #TODO: Import data into db
 
                 self.data["dwelling_area_dict"] = {} #TODO: FAR calculations
             self.data["assessor_map"] = "https://www.sccassessor.org/apps/ShowMapBook.aspx?apn={0}".format(
                 self.data["apn"])
+            self.data["opportunity_zone"] = self.find_intersects_one(self.data["geometry"], tables["oz"], "namelsad",
+                                                                  parcel_proj=4326, zone_proj=4269)
         return self.data

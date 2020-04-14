@@ -1,7 +1,7 @@
 from time import time
-import calculations.SanDiego as SanDiego
-import calculations.SantaClara_County as SantaClara_County
-import calculations.SanJose as SanJose
+from calculations.SanDiego import SanDiego
+from calculations.SantaClara_County import SantaClara_County
+from calculations.SanJose import SanJose
 
 """This module implements a Factory Pattern class to handle all instances of the many AddressQuery subclasses"""
 
@@ -30,12 +30,15 @@ def _format_sfx(address_entry):
 
 def _format_apn(apn_entry):
     """Strips all non-alphanumeric character for a string. Used to format APN texts."""
-    return ''.join([c for c in apn_entry if c.alnum()])
+    return ''.join([c for c in apn_entry if c.isalnum()])
 
 class AddressQueryFactory:
+    queries = (
+        (("ca", "california"), (SanJose, SanDiego, SantaClara_County)),
+    )
+
     def __init__(self, max_cache=120):
         """AddressQueueFactory will log data from address_queries. This is mainly intended for backend testing."""
-
         if type(max_cache) not in [int, float]:
             raise TypeError("max_cache must be an integer at least 1")
         if max_cache < 1:
@@ -45,14 +48,6 @@ class AddressQueryFactory:
         self.cache = []
         self.log = []
 
-    def _update_log(self, log_entry, cache_entry):
-        if len(self.log) == self.max_cache:
-            self.cache.pop(0)
-            self.log.pop(0)
-
-        self.log.append(log_entry)
-        self.cache.append(cache_entry)
-
     def get(self, city, state, address=None, apn=None):
         """
         factory method for returning data using get() from various AddressQuery subclasses, depending on inputs
@@ -61,14 +56,15 @@ class AddressQueryFactory:
         if address is None and apn is None:
             raise TypeError("Query requires either address or apn")
 
-        address_query = None
-        if state.lower() in ["ca", "california"]:
-            if city.lower() in SanDiego.city_list:
-                address_query = SanDiego.SanDiego()
-            elif city.lower() == "san jose":
-                address_query = SanJose.SanJose()
-            elif city.upper() in SantaClara_County.city_list:
-                address_query = SantaClara_County.SantaClara_County()
+        def _get_address_query():
+            for query_entry in AddressQueryFactory.queries:
+                if state.lower() in query_entry[0]:
+                    for q in query_entry[1]:
+                        if city.lower() in [c.lower() for c in q.city_list]:
+                            return q()
+            return None
+
+        address_query = _get_address_query()
 
         data = {}
         if address_query:
@@ -95,3 +91,11 @@ class AddressQueryFactory:
             return "None"
         else:
             return self.log[-1]
+
+    def _update_log(self, log_entry, cache_entry):
+        if len(self.log) == self.max_cache:
+            self.cache.pop(0)
+            self.log.pop(0)
+
+        self.log.append(log_entry)
+        self.cache.append(cache_entry)
