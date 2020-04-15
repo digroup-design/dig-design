@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 import os
+import configparser
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,17 +36,26 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ORIGIN_WHITELIST = [
+    "https://digroup.design",
+    "https://dev.digroup.design",
+    "http://localhost:8080",
+    "http://127.0.0.1:9000"
 ]
 
 ROOT_URLCONF = 'dig.urls'
@@ -72,20 +82,22 @@ WSGI_APPLICATION = 'dig.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+pg_config = configparser.ConfigParser()
+pg_config.read('config/postgres.credentials')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'DIG_geojson',
-        'PASSWORD': 'WIrqJruyTSAC8QSIxpTY',
-        'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
-        'USER': 'postgres',
+        'PASSWORD': pg_config['DEFAULT']['PASSWORD'],
+        'HOST': pg_config['DEFAULT']['HOST'],
+        'USER': pg_config['DEFAULT']['USER'],
         'PORT': '5432'
     },
     'query': {
         'NAME': 'geojson',
-        'PASSWORD': 'WIrqJruyTSAC8QSIxpTY',
-        'HOST': 'dig-geojson.cxuk6wwk5lsd.us-west-2.rds.amazonaws.com',
-        'USER': 'postgres',
+        'PASSWORD': pg_config['DEFAULT']['PASSWORD'],
+        'HOST': pg_config['DEFAULT']['HOST'],
+        'USER': pg_config['DEFAULT']['USER'],
         'PORT': '5432'
     }
 }
