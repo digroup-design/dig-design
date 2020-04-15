@@ -154,12 +154,9 @@ file_list = [
 # cur.execute(query)
 # print(cur)
 
-test_apn = (3232023900, 3136512600, 3155210101, 3151001216, 3801310400)
-q = Q()
-for a in test_apn:
-    print(q.get("san diego", "ca", apn=str(a))['opportunity_zone'])
-    print(q)
 
+
+print(csv_to_dict("sandiego_test_data.csv", ';'))
 
 # data = sd.get(address="2405 union st")
 # geo = data['geometry']
