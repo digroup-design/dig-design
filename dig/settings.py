@@ -53,6 +53,7 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_WHITELIST = [
     "https://digroup.design",
+    "https://www.digroup.design",
     "https://dev.digroup.design",
     "http://localhost:8080",
     "http://127.0.0.1:9000"
