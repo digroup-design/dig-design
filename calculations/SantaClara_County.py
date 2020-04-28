@@ -17,15 +17,15 @@ class SantaClara_County(AddressQuery):
         """param city and state are not used for this class"""
 
         if address:
-            cond = "UPPER(CONCAT_WS(' ', a.housenumte, a.streetpref, a.streetname, a.streettype, a.streetsuff))\
-             = UPPER('{0}')".format(address.strip())
+            cond = "a.full_addr = '{0}'".format(address.strip().upper())
         elif apn:
             cond = "p.apn = '{0}'".format(apn)
         else:
             raise TypeError("Query requires either address or apn")
 
         select_fields = ("a.city", "a.housenumte", "a.streetname", "a.streetpref", "a.streetsuff", "a.streettype",
-                         "a.unitnumber", "a.zipcode", "p.apn", "p.shape_area", "p.shape_leng", "p.geometry")
+                         "a.unitnumber", "a.zipcode", "p.apn", "p.shape_area", "p.shape_leng", "p.geometry",
+                         "a.full_addr")
         tables = SantaClara_County.tables
         data_query = """
                      SELECT {0}
@@ -46,7 +46,7 @@ class SantaClara_County(AddressQuery):
                               "street_sfx": "streettype",
                               "city": "city",
                               "zip": "zipcode",
-                              "apn": "apn"}
+                              "apn": "apn",}
 
             for f, s in feature_to_sql.items():
                 self.data[f] = data_feature[s]
@@ -54,10 +54,7 @@ class SantaClara_County(AddressQuery):
 
             self.data["street_name"] = " ".join(filter(None, [data_feature['streetpref'],
                                                               data_feature['streetname']]))
-            self.data["street_name_full"] = " ".join(filter(None, [data_feature['housenumte'],
-                                                                   self.data["street_name"],
-                                                                   data_feature['streettype'],
-                                                                   data_feature['streetsuff'],])).title()
+            self.data["street_name_full"] = data_feature["full_addr"].title()
             self.data["state"] = "CA"
             self.data["city_zip"] = " ".join(filter(None, [self.data["city"].title(), self.data["state"] + ",", self.data["zip"]]))
             self.data["address"] = ", ".join([self.data["street_name_full"], self.data["city_zip"]])

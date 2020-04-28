@@ -1,5 +1,8 @@
 import simplejson as json
 import psycopg2 as pg
+import numpy as np
+import os
+import re
 from dig.settings import DATABASES
 
 """Handles the implementation of Postgres package psycopg2 for use in other modules"""
@@ -77,16 +80,23 @@ def pg_get_fields(sql_table, fields:list=None, cursor=None)->dict:
     if conn: conn.close()
     return fields_type
 
-
 def pyval_to_sql(val)->str:
     """:returns a variable val in Python to a string for a sql query"""
 
     if val is None: return "NULL"
     elif isinstance(val, str): return "'{0}'".format(val.replace("'", "''"))
-    elif isinstance(val, dict): return "'{0}'".format(json.dumps(val).replace("'", "''"))
-    # elif val.__class__ in [list, tuple, set]:
-    #     val = tuple(val)
-    #     TODO
+    elif val.__class__ in (dict, list, tuple, set):
+        if val.__class__ == set: val = tuple(val)
+        ret_str = json.dumps(val).replace("'", "''")
+        replacements = (
+            ('-Infinity', '"-INF"'),
+            ('Infinity', '"INF"'),
+            ('""-Infinity""', '"-INF"'),
+            ('""Infinity""', '"INF"')
+        )
+        for r in replacements:
+            ret_str = ret_str.replace(r[0], r[1])
+        return "'{0}'".format(ret_str)
     else: return str(val)
 
 def pytype_to_sql(val)->str:
@@ -99,21 +109,13 @@ def pytype_to_sql(val)->str:
         float: "DOUBLE PRECISION",
         bool: "BOOL",
         dict: "json",
-        None.__class__: "VARCHAR(1)"}
+        set: "json",
+        list: "json",
+        tuple: "json",
+        None.__class__: "VARCHAR(1)"
+    }
 
-    if val.__class__ in [list, tuple, set]:
-        val = tuple(val)
-        if len(val) == 0:
-            return data_map[None.__class__] + "[]"
-        else:
-            list_type_set = set([elem.__class__ for elem in val])
-            #TODO: edge case for empty tuple () -- elem to the first value that is not (), assume None if all ()
-            if len(list_type_set) == 1:
-                elem = val[0]
-            else:
-                elem = str(val[0])
-            return pytype_to_sql(elem) + "[]"
-    elif val.__class__ is not type:
+    if val.__class__ is not type:
         return pytype_to_sql(val.__class__)
     elif val in data_map.keys():
         return data_map[val]
@@ -202,3 +204,159 @@ def _sql_to_dict(values, fields, sql_table):
     for val, (f, ty) in zip(values, fields_type.items()):
         result_dict[f] = val
     return result_dict
+
+
+def _import_data(file_dir, transpose=False):
+    """
+    Imports zoning data from local tsv resources into memory as dictionaries, then loads them into SQL
+    The first row of the tsv/csv files should be the names of the zones, and the first column should have
+    the regulation labels. If the reverse if the case, set transpose=True
+
+    All filenames, located within file_dir, follow the following format:
+        [FOOT]_[D/U]_[Zone regex].tsv
+        D for development regulations; U for use regulations
+        'FOOT' is prefixed to the filename only if it contains footnote information for its respective file
+    """
+
+    def _str_to_num(text):
+        text_clean = ''.join([c for c in text if (c == '.' or c.isalnum())])
+        try:
+            if "." in text_clean:
+                return float(text_clean)
+            elif text_clean.lower() in ('inf', '-inf'):
+                return float(text_clean.lower())
+            else:
+                return int(text_clean)
+        except ValueError:
+            return text
+
+    def _split_str(text, sep="[", strip="]"):
+        text = text.replace(strip, "")
+        return [t.strip() for t in text.split(sep)]
+
+    def _format_dict(reg_dict):
+        reg_dict_copy = {}
+        # print("Format dict for ", reg_dict, reg_dict.keys())
+        for zn, rule_dict in reg_dict.items():
+            working_dict = {}
+            for k, v in rule_dict.items():
+                footnotes = _split_str(k, "[", "]")
+                k = footnotes.pop(0)
+                if "\\" in k:
+                    key_parts = k.split("\\")
+                    subcategory = key_parts[0]
+                    label = key_parts[1]
+                else:
+                    subcategory = None
+                    label = k
+
+                rule_footnotes = _split_str(v, "(", ")")
+                rule = _str_to_num(rule_footnotes.pop(0))
+                footnotes += rule_footnotes
+
+                if len(footnotes) == 0:
+                    footnotes = None
+
+                working_dict[label] = {
+                    "rule": rule,
+                    "subcategory": subcategory,
+                    "footnotes": footnotes
+                }
+            reg_dict_copy[zn] = working_dict
+        return reg_dict_copy
+
+    use_regs = {}
+    dev_regs = {}
+    use_footnotes = {}
+    dev_footnotes = {}
+
+    def _genfromtxt(filename, delimiter='\t', encoding='utf-8'):
+        array = []
+        for r in open(filename, 'r', encoding=encoding):
+            entry = r.strip('\n').split(delimiter)
+            array.append(entry)
+        return array
+
+    for f in ['/'.join((file_dir, f)) for f in os.listdir(file_dir) if (f.endswith('.csv') or f.endswith('.tsv'))]:
+        print(f)
+        file_data = _genfromtxt(f, '\t', encoding='utf-8')
+        if '/' in f:
+            filename = str(f).split('/')[-1]
+        else:
+            filename = f
+        filename = str(filename).split(".")[0]
+        if transpose:
+            file_data = np.transpose(file_data)
+
+        # parse filename to see which dict to populate
+        filename_parse = filename.split("_")
+        data_dict = {}
+        if filename_parse[0].upper() == "FOOT":  # case if file holds footnotes
+            if len(filename_parse) < 3:
+                raise ValueError("Filename for footnotes must be in format FOOT_[D/U]_[regex].[csv/tsv]")
+            key = filename_parse[2].replace("+", ".+")
+            for row in file_data:
+                data_dict[row[0]] = row[1]
+            if filename_parse[1].upper() == "D":
+                dev_footnotes[key] = data_dict
+            elif filename_parse[1].upper() == "U":
+                use_footnotes[key] = data_dict
+            else:
+                raise ValueError("Filename for regulations must be in format [D/U]_[regex].[csv/tsv]")
+        else:
+            zone_keys = file_data[0]
+            for i in range(1, len(zone_keys)):
+                zone = zone_keys[i].replace("+", ".+")
+                data_dict[zone] = {}
+                for j in range(1, len(file_data)):
+                    label = file_data[j][0]
+                    data_dict[zone][label] = file_data[j][i]
+
+            if filename_parse[0].upper() == "D":
+                dev_regs.update(data_dict)
+            elif filename_parse[0].upper() == "U":
+                use_regs.update(data_dict)
+
+    use_regs = _format_dict(use_regs)
+    dev_regs = _format_dict(dev_regs)
+
+    # insert footnotes entry to dicts use_regs and dev_regs
+    for (foot_dict, reg_dict) in [(use_footnotes, use_regs), (dev_footnotes, dev_regs)]:
+        for foot_key in foot_dict.keys():
+            for reg_key in reg_dict.keys():
+                if re.match(foot_key, reg_key):
+                    reg_dict[reg_key]["footnotes"] = foot_dict[foot_key]
+
+    # import files in folder tables
+    tables = {}
+    for f in ['/'.join((file_dir, 'tables', f)) for f in os.listdir(file_dir + '/tables')
+              if (f.endswith('.csv') or f.endswith('.tsv'))]:
+        table_parse = []
+        for line in _genfromtxt(f):
+            table_parse.append([_str_to_num(n) for n in line])
+        tables[(f.split(".")[0]).split("/")[-1]] = table_parse
+
+    conn = init_conn()
+    cur = conn.cursor()
+    def _iter_to_sql(sql_table, *items):
+        values = [pyval_to_sql(itm) for itm in items]
+        query = """
+            INSERT INTO {0}
+            VALUES ({1});
+            COMMIT;
+        """.format(sql_table, ", ".join(values))
+        cur.execute(query)
+
+
+    table_prefix = ''.join([c.lower() for c in (file_dir.split('/')[-1] if '/' in file_dir else file_dir) if c.isalnum()])
+    dict_to_table = (
+        (use_regs, "{0}_regulations_use".format(table_prefix)),
+        (dev_regs, "{0}_regulations_dev".format(table_prefix)),
+        (tables, "{0}_regulations_tables".format(table_prefix))
+    )
+
+    for n in dict_to_table:
+        for label, data in n[0].items():
+            _iter_to_sql(n[1], label, data)
+    conn.close()
+    return use_regs, dev_regs, tables

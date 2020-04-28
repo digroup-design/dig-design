@@ -11,7 +11,7 @@ class SanJose(SantaClara_County):
         """param city and state are not used for this class"""
 
         if address:
-            cond = "UPPER(a.fulladdres) = '{0}'".format(address.strip().upper())
+            cond = "a.full_addr = '{0}'".format(address.strip().upper())
         elif apn:
             cond = "p.apn = '{0}'".format(apn)
         else:

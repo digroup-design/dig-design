@@ -30,10 +30,10 @@ def _format_sfx(address_entry):
 
 def _format_apn(apn_entry):
     """Strips all non-alphanumeric character for a string. Used to format APN texts."""
-    return ''.join([c for c in apn_entry if c.isalnum()])
+    return ''.join([c for c in str(apn_entry) if c.isalnum()])
 
 class AddressQueryFactory:
-    queries = (
+    queries = ( #Update this as more AddressQuery classes are created
         (("ca", "california"), (SanJose, SanDiego, SantaClara_County)),
     )
 
@@ -93,7 +93,7 @@ class AddressQueryFactory:
             return self.log[-1]
 
     def _update_log(self, log_entry, cache_entry):
-        if len(self.log) == self.max_cache:
+        if len(self.log) >= self.max_cache:
             self.cache.pop(0)
             self.log.pop(0)
 

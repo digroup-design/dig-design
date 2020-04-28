@@ -1,4 +1,5 @@
 from shapely.geometry import shape
+import re
 import simplejson as json
 import database as db
 
@@ -7,6 +8,21 @@ FT_PER_M = 3.280839895 #for sq ft per sq m, square this value
 def area(geometry:dict):
     """returns the area of the geospatial data geometry"""
     return shape(geometry).area
+
+def match_search(string, search, in_order=True):
+    """true if search matches string"""
+    search = re.sub(r'\W+', ' ', search).lower().strip()
+    string = re.sub(r'\W+', ' ', string).lower().strip()
+    if search == string:
+        return True
+    else:
+        for s in search.split(' '):
+            if s not in string:
+                return False
+            else:
+                if in_order:
+                    string = string.replace(s, '\t').split('\t')[-1]
+        return True
 
 """
 An abstract class for querying an Address.
