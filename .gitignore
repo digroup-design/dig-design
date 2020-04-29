@@ -1,8 +1,5 @@
 venv
-<<<<<<< HEAD
-=======
 .vscode
->>>>>>> develop
 config
 .idea
 data
