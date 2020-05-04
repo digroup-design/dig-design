@@ -36,34 +36,25 @@ class AddressQuery:
         self.conn = db.init_conn()
         self.cur = self.conn.cursor()
         self.data = {
-            "address": None, #may be built using street_number, street_name, street_sfx, city, etc
-            "street_number": None,
-            "street_name": None,
-            "street_sfx": None,
-            "street_name_full": None,
-            "city": None,
-            "state": None,
-            "zip": None,
-            "city_zip": None,
-            "apn": None,
-            "parcel_id": None,
-            "owner_name": None,
-            "owner_address": None,
-            "zone": None,
-            "zone_info_dict": None, #dictionary containing all info pertaining to zone codes
-            "lot_area": None,
-            "lot_width": None,
-            "max_density": None,
-            "max_density_unit": None,
-            "base_dwelling_units": None,
-            "max_dwelling_units": None,
-            "dwelling_area_dict": None, #dict containing FAR-related values and calculations
-            "base_buildable_area": None,
-            "affordable_dict": None, #dictionary containing affording housing calculations
+            "geometry": None, #dict (geojson)
+            "apn": None, #str
+            "street_address": None, #str
+            "city": None, #str
+            "state": None, #str
+            "zip": None, #str
+            "owner_name": None, #str
+            "owner_address": None, #stt
+            "lot_area": None, #float
+            "lot_width": None, #float
             "transit_priority": None, #boolean
-            "assessor_map": None,
-            "opportunity_zone": None,
-            "geometry": None #geojson dict for parcel data
+            "opportunity_zone": None, #boolean
+            "zone": None, #str
+            "use_regulations": None, #dict
+            "max_dwelling_units": None, #int
+            "dwelling_units": None, #list[dict]
+            "max_buildable_area": None, #float
+            "buildable_area": None, #list[dict]
+            "assessor_map_link": None, #str (url)
         }
 
     def __del__(self):

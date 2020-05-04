@@ -101,25 +101,24 @@ class SanDiegoZoneQuery(ZoneQuery):
         def _dwelling_units():
             """Populates base_density, base_dwelling_units, max_dwelling_units"""
             density_info = []
-            val, unit, note, cal = 0, 1, 2, 3
             density_units = ("sf per DU", "DU per lot")
             transit_note = "100% density bonus requires avg. unit size of 600 SF & max. unit size of 800 SF"
 
             density_info.append(self._default_density())
             self.data["density"] = density_info
             du_unit = "dwelling units"
-            if density_info[0][unit] == density_units[1]:
-                self.data["dwelling_units"] = [(density_info[val], du_unit, None, None)]
+            if density_info[0]["unit"] == density_units[1]:
+                self.data["dwelling_units"] = [self._makeentry(density_info[0]["value"], du_unit, None, None)]
             elif attr["area"]:
                 du_info = []
-                density = density_info[0][val]
+                density = density_info[0]["value"]
                 num_units = attr["area"] / density
                 units_calc = "{0} sf / {1} sf per DU = {2} -> {3} DUs".format(
                     attr["area"], density, num_units, math.ceil(num_units))
-                du_info.append((math.ceil(num_units), du_unit, None, units_calc))
+                du_info.append(self._makeentry(math.ceil(num_units), du_unit, None, units_calc))
 
                 #check for affordable info
-                base_units = du_info[0][val]
+                base_units = du_info[0]["value"]
                 affordable_dict = self._affordable(math.ceil(base_units),
                                                    self._coalesce(attr["transit_priority"], False))
                 if affordable_dict:
@@ -128,24 +127,23 @@ class SanDiegoZoneQuery(ZoneQuery):
                         annot = data[annotation].split(";")
                         calc = annot[1].strip()
                         note = annot[0].strip() + (("; " + transit_note) if attr["transit_priority"] else '')
-                        du_info.append((data[max_units], du_unit, note, calc))
-                self.data["dwelling_units"] = sorted(du_info, key=lambda x: x[val])
+                        du_info.append(self._makeentry(data[max_units], du_unit, note, calc))
+                self.data["dwelling_units"] = sorted(du_info, key=lambda x: x["value"])
 
         def _buildable_area():
             far_info = [] #far info should be stored in a tuple of (value, notes, calc)
             far_unit = None
-            val, unit, note, cal = 0, 1, 2, 3
 
             if self._re_match("^RS-1-[234567]$", zone) and attr["area"]:
                 far_note = "Sec 131.0446(a): Floor Area Ratio is based on the lot area in accordance with Table 131-04J."
                 for row in self._get_table('131-04J', SanDiegoZoneQuery.tables):
                     if attr["area"]:
                         if float(row[0]) <= round(attr["area"]) <= float(row[1]):
-                            far_info.append((row[2], far_unit, far_note, None))
+                            far_info.append(self._makeentry(row[2], far_unit, far_note, None))
                             break
                     else:
                         far_calc = "{0} - {1} s.f.".format(str(row[0]), str(row[1]))
-                        far_info.append((row[2], far_unit, far_note, far_calc))
+                        far_info.append(self._makeentry(row[2], far_unit, far_note, far_calc))
             elif self._re_match("RT-+.", zone):
                 """
                 Sec 131.0446(d): In the RT zones, up to 525 square feet of garage area may be excluded from the 
@@ -154,7 +152,7 @@ class SanDiegoZoneQuery(ZoneQuery):
                 for k, v in self.data['dev_regulations'].items():
                     if self._re_match("floor.*area.*ratio", self._coalesce(v["subcategory"]).lower()):
                         #RT-zones have different FAR for 1-2 and 3 stories
-                        far_info.append((v['rule'], k, None))
+                        far_info.append(self._makeentry(v['rule'], k, None))
             elif (self._re_match("RM-1-[23]", zone) or self._re_match("RM-2-[456]", zone) or
                     self._re_match("RM-3-[789]", zone) or self._re_match("RM-4-1[01]", zone)):
                 far_info.append(self._default_far())
@@ -164,11 +162,11 @@ class SanDiegoZoneQuery(ZoneQuery):
                 else: #self._re_match("RM-3-[789]", zone) or self._re_match("RM-4-1[01]", zone
                     far_note = "1/3 of buildable area reserved for required parking, unless developing Affordable Units"
                     req_parking = Fraction(1/3).limit_denominator(10)
-                far = far_info[0][val] * (1 - req_parking)
-                far_calc = "{0} FAR x {1} required parking = {2} FAR".format(far_info[0][val],
+                far = far_info[0]["value"] * (1 - req_parking)
+                far_calc = "{0} FAR x {1} required parking = {2} FAR".format(far_info[0]["value"],
                                                                              1 - req_parking,
                                                                              far)
-                far_info.append((far, far_unit, far_note, far_calc))
+                far_info.append(self._makeentry(far, far_unit, far_note, far_calc))
             elif zone == "RM-5-12":
                 far_note = "Sec 131.0446(d): Floor area ratio for buildings exceeding 4 stories or 48 feet of" \
                            " structure height shall be increased in accordance with Table 131-04K"
@@ -177,13 +175,13 @@ class SanDiegoZoneQuery(ZoneQuery):
                 # otherwise append entire table
                 if attr["floors"] or attr["height"]:
                     defaults = 1, 48, 1.80
-                    curr_far = (defaults[0], far_unit, far_note, None)
+                    curr_far = self._makeentry(defaults[0], far_unit, far_note, None)
                     for row in self._get_table("131-04K", SanDiegoZoneQuery.tables):
                         far_calc = far_calc_base.format(str(row[0]), str(row[1]))
                         if ((self._coalesce(attr["floors"], defaults[0]) >= row[0] or
                             self._coalesce(attr["height"], defaults[1]) >= row[1]) and
                             row[2] >= curr_far[0]):
-                                curr_far = (row[2], far_unit, far_note, far_calc)
+                                curr_far = self._makeentry(row[2], far_unit, far_note, far_calc)
                     far_info.append(curr_far)
                 else:
                     for row in self._get_table("131-04K", SanDiegoZoneQuery.tables):
@@ -192,17 +190,17 @@ class SanDiegoZoneQuery(ZoneQuery):
             else:
                 far_info.append(self._default_far())
 
-            far_info.sort(key=lambda x: x[val])
+            far_info.sort(key=lambda x: x["value"])
             self.data["far"] = far_info
 
             if attr["area"]:
                 buildable_info = []
                 build_unit = "sf"
                 for far in self.data["far"]:
-                    far_val = far[val]
+                    far_val = far["value"]
                     buildable = far_val * attr["area"]
-                    buildable_calc = "{0} FAR x {1} sf = {2} sf".format(str(far_val), str(attr["area"]), str(buildable))
-                    buildable_info.append((buildable, build_unit, None, buildable_calc))
+                    buildable_calc = "{0} FAR x {1} sf = {2} sf".format(far_val, attr["area"], buildable)
+                    buildable_info.append(self._makeentry(buildable, build_unit, None, buildable_calc))
                 self.data["buildable_area"] = buildable_info
         _dwelling_units()
         _buildable_area()
@@ -211,10 +209,12 @@ class SanDiegoZoneQuery(ZoneQuery):
         self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter13/Ch13Art01Division05.pdf"
         decimals = self._coalesce(attr["decimals"], 2)
         def _dwelling_units():
+            self.data["density"] = []
             if zone in ("CO-2-1", "CO-2-2", "CP-1-1"):
-                self.data["density"] = [(None, None, "Residential use not permitted.", None)]
+                self.data["density"].append(self._makeentry(value=None, unit=None,
+                                                            note="Residential use not permitted.", calc=None))
             else:
-                self.data["density"] = [self._default_density()]
+                self.data["density"].append(self._default_density())
                 if attr["area"]:
                     du_info = []
                     du_unit = "dwelling units"
@@ -265,9 +265,9 @@ class SanDiegoZoneQuery(ZoneQuery):
                     buildable_info.append(self._makeentry(value=round(build_area, decimals),
                                                           unit=build_unit, note=build_note, calc=build_calc))
                 self.data["buildable_area"] = sorted(buildable_info, key=lambda x: x["value"])
-
         _dwelling_units()
         _buildable_area()
+
     def _zone_i(self, zone, attr):
         self.data["reference"] = "TODO"
 
@@ -285,6 +285,9 @@ class SanDiegoZoneQuery(ZoneQuery):
 
     def _zone_mx(self, zone, attr):
         self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter13/Ch13Art01Division07.pdf"
+        def _buildable_area():
+            pass
+
     def _affordable(self, base_units, transit_priority=False):
         """
         Ref: https://docs.sandiego.gov/municode/MuniCodeChapter14/Ch14Art03Division07.pdf

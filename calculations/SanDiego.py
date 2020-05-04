@@ -1,5 +1,5 @@
 from calculations.AddressQuery import AddressQuery
-from SanDiegoZoneQuery import SanDiegoZoneQuery
+from calculations.SanDiegoZoneQuery import SanDiegoZoneQuery
 
 class SanDiego(AddressQuery):
     tables = {
@@ -71,8 +71,6 @@ class SanDiego(AddressQuery):
                 if self.data[f]: self.data[f] = str(self.data[f]).title()
 
             self.data["state"] = "CA"
-            self.data["city_zip"] = " ".join([self.data["city"].title() + ",", self.data["state"], self.data["zip"]])
-            self.data["address"] = " ".join([self.data["street_name_full"], self.data["city_zip"]])
             self.data["owner_name"] = "\n".join(list(filter(None, [data_feature[o] for o in owner_name_fields])))
             self.data["owner_address"] = "\n".join(list(filter(None, [data_feature[o] for o in owner_addr_fields])))
             self.data["geometry"] = data_feature["geometry"]
@@ -87,19 +85,15 @@ class SanDiego(AddressQuery):
             if self.data["zone"]:
                 attr = {"geometry": self.data["geometry"],
                         "area": self.data["lot_area"],
-                        "transit_priority": self.data["transit_priority"]}
+                        "transit_priority": self.data["transit_priority"]
+                        }
                 zone_query = SanDiegoZoneQuery()
                 zone_info = zone_query.get(self.data["zone"], attr)
                 if zone_info['reference']:
-                    self.data["zone_info_dict"] = { "use_regulations": zone_info['use_regulations'],
-                                                    "dev_regulations": zone_info['dev_regulations']
-                    }
-
-                    max_density = zone_info['base_density']
-                    self.data["max_density"] = max_density[0]
-                    self.data["max_density_unit"] = max_density[1]
-                    self.data["base_dwelling_units"] = zone_info['dwelling_units']
-                    self.data["max_dwelling_units"] = zone_info['dwelling_units']
-                    self.data["dwelling_area_dict"] = zone_info['buildable_area']
+                    self.data["use_regulations"] = zone_info['use_regulations']
+                    self.data["dwelling_units"] = zone_info['dwelling_units']
+                    self.data["buildable_area"] = zone_info['buildable_area']
+                    self.data["max_dwelling_units"] = self.data["dwelling_units"][-1]['value']
+                    self.data["max_buildable_area"] = self.data["buildable_area"][-1]['value']
 
         return self.data
