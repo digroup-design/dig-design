@@ -45,7 +45,7 @@ class SanDiegoZoneQuery(ZoneQuery):
         }
         if attr: self.attr.update(attr)
 
-        self.data["zone"] = zone.upper()
+        self.data["zone"] = zone = zone.upper().replace("CUPD-", '')
         if self.attr["area"] is None and self.attr["geometry"] is not None:
             self.attr["area"] = area(self.attr["geometry"])
 
@@ -54,16 +54,36 @@ class SanDiegoZoneQuery(ZoneQuery):
         else:
             zone_cat = self.data["zone"]
 
-        self.data["dev_regulations"] = self._find_regs(zone, SanDiegoZoneQuery.dev_regs)
-        self.data["use_regulations"] = self._find_regs(zone, SanDiegoZoneQuery.use_regs)
-        if None in (self.data["dev_regulations"], self.data["use_regulations"]):
-            raise ValueError("Data for {0} not found.".format(zone))
+        def _set_reg_dict(zone_key):
+            if zone.startswith("CT-"):
+                """Ch15, Art5, Div2 - Sec 155.0236"""
+                ct_table = (
+                    ("CT-5-4", "CC-5-4", "CC-5-4", "RM-2-5", True),
+                    ("CT-2-3", "CU-2-3", "CU-2-3", "RM-2-5", True),
+                    ("CT-2-4", "CU-2-4", "CU-2-4", "RM-2-5", True),
+                    ("CT-3-3", "CP-1-1", "CU-3-3", "RM-1-2", False)
+                )
+                for r in ct_table:
+                    """Development in r[0] is subject to the r[1] zone regulations if any portion of development is 
+                    also within a r[2] zone {{if r[4], and fronts a major street designated in community plan}},
+                    otherwise r[3] zone regulations apply."""
+                    if zone_key == r[0]:
+                        cond = True #TODO: write logic for conditions, using r[2] and r[4]
+                        zone_key = r[1] if cond else r[3]
+                    #TODO: logic for Table 155-02A
+
+            self.data["dev_regulations"] = self._find_regs(zone_key, SanDiegoZoneQuery.dev_regs)
+            self.data["use_regulations"] = self._find_regs(zone_key, SanDiegoZoneQuery.use_regs)
+            if None in (self.data["dev_regulations"], self.data["use_regulations"]):
+                raise ValueError("Data for {0} not found.".format(zone))
+
+        _set_reg_dict(zone)
 
         if zone_cat.startswith("R"):
             self._zone_r(zone, self.attr)
         elif zone_cat.startswith("CCPD"):
             self._zone_ccpd(zone, self.attr)
-        elif zone_cat.startswith("CU"):
+        elif zone_cat.startswith("CU") or zone_cat.startswith("CT"):
             self._zone_cupd(zone, self.attr)
         elif zone_cat.startswith("C"):
             self._zone_c(zone, self.attr)
@@ -75,13 +95,13 @@ class SanDiegoZoneQuery(ZoneQuery):
             self._zone_mx(zone, self.attr)
         return self.data
 
-    def _default_far(self):
+    def _default_far(self)->dict:
         """default implementation of finding FAR if no special cases"""
         for k, v in self.data['dev_regulations'].items():
             if self._re_match(".*floor.*area.*ratio.*", k.lower()):
                 return self._makeentry(value=v['rule'], unit=None, note=k, calc=None)
 
-    def _default_density(self):
+    def _default_density(self)->dict:
         """default implementation of finding permitted density if no special cases"""
         for k, v in self.data['dev_regulations'].items():
             if self._re_match("max.* density", k.lower()):
@@ -91,7 +111,63 @@ class SanDiegoZoneQuery(ZoneQuery):
                     density_unit = "sf per DU"
                 return self._makeentry(value=v['rule'], unit=density_unit, note=k, calc=None)
 
-    def _zone_r(self, zone, attr):
+    def _default_dwelling_units(self, area:float, density_info:list, do_affordable=True, transit_priority=False)->list:
+        """
+        default implementation of finding possible numbers of dwelling units
+        :param area: lot area of parcel
+        :param density_info: list of dict entries holding density-related data
+        :param do_affordable: True if affordable calculations apply
+        :param transit_priority: True if parcel lies within a transit priority area
+        :return: list of dwelling units calculations in ascending order
+        """
+        du_info = []
+        du_unit = "dwelling units"
+        area_unit = "sf"
+        dec_round = 2
+        for d in density_info:
+            try:
+                dwelling_units = area / d["value"]
+                note = d["note"]
+                calc = "{0} {1} / {2} {3} = {4} -> {5} {6}".format(
+                    round(area, dec_round), area_unit,
+                    d["value"], d["unit"],
+                    round(dwelling_units, dec_round), math.ceil(dwelling_units), du_unit
+                )
+            except TypeError:
+                dwelling_units = None
+                note = "Invalid density value"
+                calc = None
+            du_info.append(self._makeentry(value=math.ceil(dwelling_units), unit=du_unit, note=note, calc=calc))
+
+        if do_affordable and len(du_info)> 0:
+            transit_note = "100% density bonus requires avg. unit size of 600 SF & max. unit size of 800 SF"
+            base_units = du_info[0]["value"]
+            affordable_dict = self._affordable(math.ceil(base_units), transit_priority)
+            if affordable_dict:
+                max_units, market_units, affordable_units, num_incentives, annotation = 0, 1, 2, 3, 4
+                for income, data in affordable_dict.items():
+                    annot = data[annotation].split(";")
+                    calc = annot[1].strip()
+                    note = annot[0].strip() + (("; " + transit_note) if transit_priority else '')
+                    du_info.append(self._makeentry(data[max_units], du_unit, note, calc))
+
+        return sorted(du_info, key=lambda x: x["value"])
+
+    def _default_buildable_area(self, area:float, far_info:list)->list:
+        buildable_info = []
+        far_unit = None
+        dec_round = 2
+        for b in far_info:
+            buildable_area = area * b["value"]
+            note = b["note"]
+            calc = "{0} {1} x {2} (FAR) = {3} {1}".format(
+                round(area, dec_round), b["unit"],
+                b["value"], round(buildable_area, dec_round)
+            )
+            buildable_info.append(self._makeentry(value=buildable_area, unit=far_unit, note=note, calc=calc))
+        return sorted(buildable_info, key=lambda x: x["value"])
+
+    def _zone_r(self, zone, attr, do_buildable=True, do_dwelling_units=True):
         """
         Retrieves data for Residential Base Zones in get()
         Municipal Code: Ch13, Art01, Div04
@@ -163,9 +239,7 @@ class SanDiegoZoneQuery(ZoneQuery):
                     far_note = "1/3 of buildable area reserved for required parking, unless developing Affordable Units"
                     req_parking = Fraction(1/3).limit_denominator(10)
                 far = far_info[0]["value"] * (1 - req_parking)
-                far_calc = "{0} FAR x {1} required parking = {2} FAR".format(far_info[0]["value"],
-                                                                             1 - req_parking,
-                                                                             far)
+                far_calc = "{0} FAR x {1} required parking = {2} FAR".format(far_info[0]["value"], 1 - req_parking, far)
                 far_info.append(self._makeentry(far, far_unit, far_note, far_calc))
             elif zone == "RM-5-12":
                 far_note = "Sec 131.0446(d): Floor area ratio for buildings exceeding 4 stories or 48 feet of" \
@@ -186,7 +260,7 @@ class SanDiegoZoneQuery(ZoneQuery):
                 else:
                     for row in self._get_table("131-04K", SanDiegoZoneQuery.tables):
                         far_calc = far_calc_base.format(str(row[0]), str(row[1]))
-                        far_info.append((row[2], far_unit, far_note, far_calc))
+                        far_info.append(self._makeentry(row[2], far_unit, far_note, far_calc))
             else:
                 far_info.append(self._default_far())
 
@@ -202,8 +276,8 @@ class SanDiegoZoneQuery(ZoneQuery):
                     buildable_calc = "{0} FAR x {1} sf = {2} sf".format(far_val, attr["area"], buildable)
                     buildable_info.append(self._makeentry(buildable, build_unit, None, buildable_calc))
                 self.data["buildable_area"] = buildable_info
-        _dwelling_units()
-        _buildable_area()
+        if do_dwelling_units: _dwelling_units()
+        if do_buildable: _buildable_area()
 
     def _zone_c(self, zone, attr):
         self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter13/Ch13Art01Division05.pdf"
@@ -269,7 +343,28 @@ class SanDiegoZoneQuery(ZoneQuery):
         _buildable_area()
 
     def _zone_i(self, zone, attr):
-        self.data["reference"] = "TODO"
+        self.data["reference"] = "http://docs.sandiego.gov/municode/MuniCodeChapter13/Ch13Art01Division06.pdf"
+        def _dwelling_units():
+            if zone.startswith("IP-"):
+                self.data["density"] = [self._default_density()]
+                if attr["area"]:
+                    transit_pr = self._coalesce(attr["transit_priority"], False)
+                    self.data["dwelling_units"] = self._default_dwelling_units(area=attr["area"],
+                                                                               density_info=self.data["density"],
+                                                                               transit_priority=transit_pr)
+            else:
+                du_unit = "dwelling units"
+                np_note = "Residential use not permitted"
+                self.data["density"] = [self._makeentry(None, None, np_note, None)]
+                self.data["dwelling_units"] = [self._makeentry(0, du_unit, np_note, None)]
+
+        def _buildable_area():
+            self.data["far"] = [self._default_far()]
+            if attr["area"]:
+                self.data["buildable_area"] = self._default_buildable_area(area=attr["area"],
+                                                                           far_info=self.data["far_info"])
+        _dwelling_units()
+        _buildable_area()
 
     def _zone_o(self, zone, attr):
         self.data["reference"] = "TODO"
@@ -277,11 +372,55 @@ class SanDiegoZoneQuery(ZoneQuery):
     def _zone_a(self, zone, attr):
         self.data["reference"] = "TODO"
 
+    def _zone_cupd(self, zone, attr):
+        self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter15/Ch15Art05Division02.pdf"
+        def _dwelling_units():
+            self.data["density"] = [self._default_density()]
+            if attr["area"]:
+                transit_priority = self._coalesce(attr["transit_priority"], False)
+                self.data["dwelling_units"] = self._default_dwelling_units(
+                    attr["area"], self.data["density"], transit_priority=transit_priority)
+
+        def _buildable_area():
+            max_far_key = "Max floor area ratio"
+            bonus_far_key = "Mixed use bonus floor area ratio"
+            min_res_key = "Min % to residential for mixed use bonus"
+            base_far, bonus_far, min_res = None, None, None
+            for k, v in self.data["dev_regulations"].items():
+                if max_far_key.lower() in k.lower():
+                    base_far = v['rule']
+                    print(base_far)
+                elif bonus_far_key.lower() in k.lower():
+                    bonus_far = v['rule']
+                    print(bonus_far)
+                elif min_res_key.lower() in k.lower():
+                    min_res = v['rule']
+                    print(min_res)
+
+            far_info = []
+            far_unit = None
+            far_info.append(self._makeentry(
+                value=base_far, unit=far_unit,
+                note="Base floor area ratio",
+                calc=None))
+            far_info.append(self._makeentry(
+                value=bonus_far, unit=far_unit,
+                note="Mixed use bonus floor area ratio; required min {0}% residential use".format(min_res),
+                calc=None))
+            far_info.append(self._makeentry(
+                value=bonus_far + base_far, unit=far_unit,
+                note="Max floor area ratio with mixed use bonus",
+                calc=None))
+            self.data["far_info"] = far_info
+
+            if attr["area"]:
+                self.data["buildable_area"] = self._default_buildable_area(attr["area"], self.data["far_info"])
+
+        _dwelling_units()
+        _buildable_area()
+
     def _zone_ccpd(self, zone, attr):
         self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter15/Ch15Art05Division02.pdf"
-
-    def _zone_cupd(self, zone, attr):
-        self.data["reference"] = "TODO"
 
     def _zone_mx(self, zone, attr):
         self.data["reference"] = "https://docs.sandiego.gov/municode/MuniCodeChapter13/Ch13Art01Division07.pdf"

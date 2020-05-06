@@ -355,8 +355,21 @@ def _import_data(file_dir, transpose=False):
         (tables, "{0}_regulations_tables".format(table_prefix))
     )
 
+
     for n in dict_to_table:
+        conn.rollback()
         for label, data in n[0].items():
-            _iter_to_sql(n[1], label, data)
+            try:
+                _iter_to_sql(n[1], label, data)
+            except pg.errors.UniqueViolation:
+                print("Updating existing name:", label)
+                query = """
+                    ROLLBACK;
+                    UPDATE {0}
+                    SET data = {1}
+                    WHERE name = {2};
+                    COMMIT;
+                """.format(n[1], pyval_to_sql(data), pyval_to_sql(label))
+                cur.execute(query)
     conn.close()
     return use_regs, dev_regs, tables

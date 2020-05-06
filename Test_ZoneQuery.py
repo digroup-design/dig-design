@@ -16,6 +16,13 @@ attr = {
     "area": 17751.11,
     "transit_priority": True
 }
+
+zone="CUPD-CU-1-1"
+attr = {
+    "area": 17751.11,
+    "transit_priority": True
+}
+
 q = SanDiegoZoneQuery()
 data = q.get(zone, attr)
 print(q)
