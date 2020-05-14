@@ -49,11 +49,9 @@ class AddressQuery:
             "transit_priority": None, #boolean
             "opportunity_zone": None, #boolean
             "zone": None, #str
-            "use_regulations": None, #dict
+            "zone_info": None, #dict
             "max_dwelling_units": None, #int
-            "dwelling_units": None, #list[dict]
             "max_buildable_area": None, #float
-            "buildable_area": None, #list[dict]
             "assessor_map_link": None, #str (url)
         }
 
@@ -111,12 +109,12 @@ class AddressQuery:
 
         self.cur.execute(query)
         overlap_entries = {}
+        id_index, area_index = 0, 1
         for z in self.cur:
-            if z[0] not in overlap_entries.keys():
-                overlap_entries[z[0]] = z[1]
+            if z[id_index] not in overlap_entries.keys():
+                overlap_entries[z[id_index]] = z[area_index]
             else:
-                overlap_entries[z[0]] += z[1]
-
+                overlap_entries[z[id_index]] += z[area_index]
         return overlap_entries
 
     def find_intersects_one(self, parcel_geometry:dict, zones_table:str, id_field, geom_field="geometry",
@@ -141,8 +139,8 @@ class AddressQuery:
                 max_value = v
         return max_key
 
-    def find_intersects_many(self, parcel_geometry:dict, zones_table, id_field, min_ratio:float=0, geom_field="geometry",
-                             parcel_proj=None, zone_proj=None)->dict:
+    def find_intersects_many(self, parcel_geometry:dict, zones_table, id_field, geom_field="geometry",
+                             parcel_proj=None, zone_proj=None, min_ratio:float=0)->dict:
         """
         :param parcel_geometry: geojson parcel polygon as dict
         :param zones_table: name of table containing zone info in the database

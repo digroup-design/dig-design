@@ -1,7 +1,7 @@
 from time import time
-from calculations.SanDiego import SanDiego
-from calculations.SantaClara_County import SantaClara_County
-from calculations.SanJose import SanJose
+from calculations.San_Diego.SanDiego import SanDiego
+from calculations.Santa_Clara_County.SantaClara_County import SantaClara_County
+from calculations.San_Jose.SanJose import SanJose
 
 """This module implements a Factory Pattern class to handle all instances of the many AddressQuery subclasses"""
 

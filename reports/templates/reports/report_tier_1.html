@@ -5,7 +5,7 @@
         </tr>
         <tr>
             <td align="right"><b>Address: </b></td>
-            <td>{{ street_name_full }}<br>{{ city_zip }}</td>
+            <td>{{ street_address }}<br>{{ city }}, {{ state}} {{ zip }}</td>
         </tr>
         <tr>
             <td align="right"><b>APN: </b></td>
@@ -23,117 +23,42 @@
             <td><br></td>
         </tr>
         <tr>
-            <td align="right"><b>Base Buildable Area: </b></td>
-            <td>{% if base_buildable_area %}<b>{{ base_buildable_area|floatformat:"2" }} SF</b> {% else %} FAR data not found {% endif %}</td>
-        </tr>
-        <tr>
-            <td align="right"><b>Base Dwelling Units: </b></td>
-            <td>{% if base_dwelling_units %} {{ lot_area|floatformat:"2"}} / {{ max_density }} → <b>{{ base_dwelling_units }}</b>{% else %} Zoning data not found {% endif %}</td>
-        </tr>
-        <tr>
-            <td><br></td>
+            <td align="right"><b>Max Buildable Area: </b></td>
+            <td>{% if max_buildable_area %}<b>{{ max_buildable_area|floatformat:"2" }} SF</b> {% else %} N/A {% endif %}</td>
         </tr>
         <tr>
             <td align="right"><b>Max Dwelling Units: </b></td>
-            <td>{% if max_dwelling_units %} <b>{{ max_dwelling_units }}</b> {% else %} Zoning data not found {% endif %}</td>
+            <td>{% if max_dwelling_units %} {{ max_dwelling_units }} {% else %} N/A {% endif %}</td>
         </tr>
-
     </table>
 </div><br>
 <div>
-    <table style="width:100%">
-        {% if affordable_dict %}
-        <tr>
-            <th colspan="2" style="text-align:center"><u>Affordable Housing Calculations</u></th>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:center">
-                <table style="text-align:center; width:100%">
-                    <tr>
-                        <th> </th>
-                        <th>Market-Price Units</th>
-                        <th>Affordable Units</th>
-                        <th>Incentives</th>
-                    </tr>
-                    {% for k, v in affordable_dict.items %}
-                    <tr>
-                        <td style="text-align:right"><b>{{ k|title }}</b></td>
-                        <td>{{ v.market_price_units }}</td>
-                        <td>{{ v.affordable_units }}</td>
-                        <td>{{ v.incentives }}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td style="text-align:right"><b>Transit Priority Area</b></td>
-                        <td>{% if lot_area %}{{ transit_priority }}{% else %}Parcel data not found{% endif %}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td><br></td>
-        </tr>
-        {% else %}
-        <tr>
-            <th>Not eligible for affordable bonus</th>
-        </tr>{% endif %}
-    </table>
-</div>
-<br>
-<div>
-    {% if dwelling_area_dict %}
+    {% if zone_info %}
+    {% for z in zone_info %}
     <table style="width:100%">
         <tr>
-            <th style="text-align:center" colspan="3"><b><u>Buildable Area</u></b></th>
+            <th colspan="2">Buildable Area Calculations</th>
         </tr>
+        {% for ba in z.buildable_area %}
         <tr>
-            <th> </th>
-            <th>Parameter</th>
-            <th>Area</th>
-        </tr>
-        {% for k, v in dwelling_area_dict.items %}
-        <tr>
-            <td>{{ k }}</td>
-            <td>{{ v.far_value }}</td>
-            <td>{{ v.area|floatformat:"2" }}</td>
+            <td>{{ ba.calc }}</td>
+            <td>{{ ba.note }}</td>
         </tr>
         {% endfor %}
-    </table>
-    {% else %}
-    <b><i>Floor-area ratio varies. See code for information on buildable area.</i></b>
-    {% endif %}
-</div>
-<br>
-<div>
-    {% if zone_info_dict %}
-    <table style="width:100%">
         <tr>
-            <th style="text-align:center" colspan="2"><h3>Regulations for Zone {{ zone }}</h3></th>
+            <th colspan="2">Dwelling Units Calculations</th>
         </tr>
+        {% for du in z.dwelling_units %}
         <tr>
-            {% for k, v in zone_info_dict.items %}
-            <td style="vertical-align:top">
-                <table>
-                    <tr>
-                        <td colspan="2"><u><b>{{ k }}</b></u></td> {# prints out rule's class #}
-                    </tr>
-                    {% for k2, v2 in v.items %}
-                    <tr>
-                        <td colspan="2"><b>{{ k2 }}</b></td>
-                    </tr>
-                    {% for k3, v3 in v2.items %}
-                    <tr>
-                        <td>{{ k3 }}</td>
-                        <td>{{ v3 }}</td>
-                    </tr>
-                    {% endfor %}
-                {% endfor %}
-                </table>
-            </td>
-            {% endfor %}
+            <td>{{ du.calc }}</td>
+            <td>{{ du.note }}</td>
         </tr>
+        {% endfor %}{% if z.reference %}
+        <tr>
+            <td colspan="2"><small>Reference: {{ z.reference }}</small></td>
+        </tr>
+        {% endif %}
     </table>
-    {% else %}
-    <p><b>Zone data currently unavailable.</b></p>
+    {% endfor %}
     {% endif %}
 </div>

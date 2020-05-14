@@ -1,4 +1,4 @@
-from calculations.SantaClara_County import SantaClara_County, area
+from calculations.Santa_Clara_County.SantaClara_County import SantaClara_County, area
 
 class SanJose(SantaClara_County):
     tables = {
