@@ -1,4 +1,5 @@
 from time import time
+import calculations.Vector as Vector
 from calculations.San_Diego.SanDiego import SanDiego
 from calculations.Santa_Clara_County.SantaClara_County import SantaClara_County
 from calculations.San_Jose.SanJose import SanJose
@@ -83,6 +84,7 @@ class AddressQueryFactory:
             self._update_log('{1} query for "{2}" in {0} s'.format(str(end_time - start_time),
                                                                    "Address" if address else "APN",
                                                                    address if address else apn), data)
+        data["dxf"] = Vector.translate_geometry(data["geometry"], "DXF")
         return data
 
     def __str__(self):
