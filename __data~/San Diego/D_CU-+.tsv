@@ -1,0 +1,29 @@
+	CU-1-1	CU-1-2	CU-[23]-3	CU-2-4	CU-2-5	CU-3-6	CU-3-7	CU-3-8
+Max residential density[2]	5000(1)	3000(1)	1000	600	1000	1500	5000	3000
+Supplemental residential regulations[3]	applies(1)	applies(1)	applies	applies	applies	applies	applies	applies
+Lot area\Min lot area (sf)	5000(1)	5000(1)	2500	2500	2500	5000	2500	2500
+Lot area\Max lot area (ac)	0.3(1)	0.3(1)	-	-	-	-	-	-
+Lot dimensions\Min width (ft)	50(1)	50(1)	25	25	25	50	25	25
+Lot dimensions\Min street frontage (ft)	-(1)	-(1)	25	25	25	50	25	25
+Lot dimensions\Min depth (ft)	-(1)	-(1)	-	-	-	100	-	-
+Max depth (ft)	(1)	(1)	-	-	-	150	-	-
+Setback Requirements	(1)	(1)						
+Setback Requirements\Min front setback(ft)	20(4)(1)	20(4)(1)	-	-	-	-	10	10
+Setback Requirements\Max front setback(ft)	-(1)	-(1)	10(5)	10(5)	10(5)	100(5)(6)	-	-
+Setback Requirements\Min side setback (ft)	10(1)	10(1)	10	10	10	10	5	5
+Setback Requirements\Optional side setback(ft) [See Land Development Code Section 131.0543(b)]	0(1)	0(1)	0-	0	0	0	-	-
+Setback Requirements\Side setback abutting residential (ft) [See Land Development Code Section 131.0543(c)]	applies(1)	applies(1)	applies	applies	applies	applies	applies	applies
+Setback Requirements\Min street side setback (ft)	20(4)(1)	20(4)(1)	-	-	-	-	10	10
+Setback Requirements\Max street side setback (ft)	-(1)	-(1)	10(5)	10(5)	10(5)	-	-	-
+Setback Requirements\Min rear setback(ft)	10(1)	10(1)	10	10	10	10	10	10
+Setback Requirements\Optional rear setback(ft) [See Land Development Code Section 131.0543(b)]	0(1)	0(1)	0	0	0	0	0	0
+Setback Requirements\Rear setback abutting  residential (ft) [See Land Development Code Section 131.0543(c)]	applies(1)	applies(1)	applies	applies	applies	applies	applies	applies
+Max structure height (ft)	24(7)(1)	24(7)(1)	50	-	90	30	30	30
+Min lot coverage (%)	-(1)	-(1)	-	35	35	-	-	-
+Max floor area ratio	0.6(1)	0.6(1)	1	2	2	0.75	0.5	0.5
+Mixed use bonus floor area ratio [See Land Development Code Section 131.0546(a)]	0.4(1)	0.4(1)	0.5	2	1.5	0.75	0.5	0.5
+Min % to residential for mixed use bonus [See Land Development Code Section 131.0546(a)]	100(1)	100(1)	50	50	50	75	50	50
+Pedestrian paths [See Land Development Code Section 131.0550]	applies(1)	applies(1)	applies	applies	applies	applies	applies	applies
+Transparency [See Land Development Code  Section 131.0552]	-(1)	-(1)	applies	applies	applies	-	applies	applies
+Building articulation [See Land Development Code Section 131.0554]	applies(1)	applies(1)	applies	applies	applies	applies	applies	applies
+Parking lot orientation [See Land Development Code Section 131.0556]	-(1)	-(1)	-	-	-	applies	-	-

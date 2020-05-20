@@ -1,0 +1,184 @@
+	OP-1-1	OP-2-1	OC-1-1	OR-1-[12]	OF-1-1
+Active Recreation	P	P(2)	-	-	P(7)
+Passive Recreation	P	P	P(6)	P(6)	P(6)
+Natural Resources Preservation	P	P	P	P	P
+Park Maintenance Facilities	P	P(2)	-	-	-
+Agricultural Processing	-	-	-	-	P(5)
+Aquaculture Facilities	-	-	-	P	P(7)
+Dairies	-	-	-	-	-
+Horticulture Nurseries & Greenhouses	-	-	-	-	-
+Raising & Harvesting of Crops	-	-	-	P	P
+Raising, Maintaining & Keeping of Animals	-	-	-	P(4)	P(4)
+Agricultural Equipment Repair Shops	-	-	-	-	-
+Commercial Stables	-	C	-	C	C
+Community Gardens	-	N	-	N	L
+Equestrian Show & Exhibition Facilities	-	-	-	-	-
+Open Air Markets for the Sale of Agriculture-Related Products & Flowers	-	-	-	L	L
+Mobilehome Parks	-	-	-	-	-
+Multiple Dwelling Units	-	-	-	-	-
+Rooming House [See Section 131.0112(a)(3)(A)]	-	-	-	-	-
+Shopkeeper Units	-	-	-	-	-
+Single Dwelling Units	-	-	P		-
+Boarder & Lodger Accommodations	-	-	L		-
+Companion Units	-	-	L		-
+Continuing Care Retirement Communities	-	-	-		-
+Employee Housing: 6 or Fewer Employees	-	-	-		-
+Employee Housing: 12 or Fewer Employees	-	-	-		-
+Employee Housing: Greater than 12 Employees	-	-	-		-
+Fraternities, Sororities and Student Dormitories	-	-	-		-
+Garage, Yard, & Estate Sales	-	-	L		-
+Guest Quarters	-	-	L		-
+Home Occupations	-	-	L		-
+Interim Ground Floor Residential	-	-	-		-
+Junior Units	-	-	L		-
+Live/work Quarters	-	-	-		-
+Permanent Supportive Housing	-	-	-		-
+Residential Care Facilities: 6 or Fewer Persons	-	-	P		-
+Residential Care Facilities: 7 or More Persons	-	-	C		-
+Transitional Housing: 6 or Fewer Persons	-	-	P		-
+Transitional Housing: 7 or More Persons	-	-	C		-
+Watchkeeper Quarters	-	-	-		-
+Airports	-	-	-		-
+Botanical Gardens & Arboretums	P	P	-		-
+Cemeteries, Mausoleums, Crematories	-	-	-		-
+Correctional Placement Centers	-	-	-		-
+Educational Facilities: Kindergarten Through Grade 12	-	-	-		-
+Educational Facilities: Colleges / Universities	-	-	-		-
+Educational Facilities: Vocational / Trade Schools	-	-	-		-
+Electric Vehicle Charging Stations	L	L	L		L
+Energy Generation & Distribution Facilities	-	-	-	-	-
+Exhibit Halls & Convention Facilities	P(2)	-	-	-	-
+Flood Control Facilities	-	-	-	-	L
+Historical Buildings Used for Purposes Not Otherwise Allowed	-	-	-	-	-
+Homeless Facilities: Congregate Meal Facilities	-	-	-	-	-
+Homeless Facilities: Emergency Shelters	-	-	-	-	-
+Homeless Facilities: Homeless Day Centers	-	-	-	-	-
+Hospitals, Intermediate Care Facilities & Nursing Facilities	-	-	-	-	-
+Interpretive Centers	P	P(2)	C	-	-
+Museums	P	-	-	-	-
+Major Transmission, Relay, or Communications Switching Stations	-	-	-	-	-
+Placemaking on Private Property	L	L	L	L	L
+Satellite Antennas	L	L	L	L	L
+Social Service Institutions	-	-	-	-	-
+Solar Energy Systems	L	L	L	L	L
+Wireless Communication Facilities	See Section 141.0419	See Section 141.0420	See Section 141.0421	See Section 141.0422	See Section 141.0423
+Building Supplies & Equipment	-	-	-	-	-
+Food, Beverages and Groceries	-	-	-	-	-
+Consumer Goods, Furniture, Appliances, Equipment	-	-	-	-	-
+Pets & Pet Supplies	-	-	-	-	-
+Sundries, Pharmaceuticals, & Convenience Sales	-	-	-	-	-
+Wearing Apparel & Accessories	-	-	-	-	-
+Agriculture Related Supplies & Equipment	-	-	-	-	-
+Alcoholic Beverage Outlets	-	-	-	-	-
+Cannabis Outlets	-	-	-	-	-
+Weekly Farmers’ Markets	-	-	-	-	-
+Daily Farmers’ Market Stands	-	-	-	-	-
+Plant Nurseries	-	-	-	-	-
+Swap Meets & Other Large Outdoor Retail Facilities	-	-	-	-	C(7)
+Building Services	-	-	-	-	-
+Business Support	-	-	-	-	-
+Eating & Drinking Establishments	P(2)	-	-	-	-
+Financial Institutions	-	-	-	-	-
+Funeral & Mortuary Services	-	-	-	-	-
+Instructional Studios	-	-	-	-	-
+Maintenance & Repair	-	-	-	-	-
+Off-site Services	-	-	-	-	-
+Personal Services	-	-	-	-	-
+Radio & Television Studios	-	-	-	-	-
+Tasting Rooms	-	-	-	-	-
+Visitor Accommodations	-	-	-	-	-
+Adult Entertainment Establishments: Adult Book Store	-	-	-	-	-
+Adult Entertainment Establishments: Adult Cabaret	-	-	-	-	-
+Adult Entertainment Establishments: Adult Drive-In Theater	-	-	-	-	-
+Adult Entertainment Establishments: Adult Mini-Motion Picture Theater	-	-	-	-	-
+Adult Entertainment Establishments: Adult Model Studio	-	-	-	-	-
+Adult Entertainment Establishments: Adult Motel	-	-	-	-	-
+Adult Entertainment Establishments: Adult Motion Picture Theater	-	-	-	-	-
+Adult Entertainment Establishments: Adult Peep Show Theater	-	-	-	-	-
+Adult Entertainment Establishments: Adult Theater	-	-	-	-	-
+Adult Entertainment Establishments: Body Painting Studio	-	-	-	-	-
+Adult Entertainment Establishments: Massage Establishment	-	-	-	-	-
+Adult Entertainment Establishments: Sexual Encounter Establishment	-	-	-	-	-
+Assembly and Entertainment Uses, Including Places of Religious Assembly	L(2)	-	-	-	-
+Bed & Breakfast Establishments:3-5 Guest Rooms	-	-	-	-	-
+Bed & Breakfast Establishments:6+ Guest Rooms	-	-	-	-	-
+Bed & Breakfast Establishments:Boarding Kennels/ Pet Day Care	-	-	-	-	-
+Boarding Kennels/ Pet Day Care	-	-	-	-	-
+Camping Parks	C	-	-	-	C(7)
+Child Care Facilities:Child Care Centers	C(2)	-	-	-	-
+Child Care Facilities:Large Family Child Care Homes	-	-	L	-	-
+Child Care Facilities:Small Family Child Care Homes	-	-	L	-	-
+Eating and Drinking Establishments with a Drive-in or Drive-through Component	-	-	-	-	-
+Fairgrounds	-	-	-	-	C(7)
+Golf Courses, Driving Ranges, and Pitch & Putt Courses	C	-	C(9)	-	C(10)
+Helicopter Landing Facilities	-	-	-	-	C(10)
+Massage Establishments, Specialized Practice	-	-	-	-	-
+Mobile Food Trucks	L(2)	-	-	-	-
+Nightclubs & Bars over 5,000 square feet in size	-	-	-	-	-
+Parking Facilities as a primary use: Permanent Parking Facilities	-	-	-	-	-
+Parking Facilities as a primary use: Temporary Parking Facilities	-	-	-	-	-
+Private Clubs, Lodges and Fraternal Organizations	-	-	-	-	-
+Privately Operated, Outdoor Recreation Facilities over 40,000 square feet in size(3)	C(2)	-	-	-	-
+Pushcarts on Private Property	L	-	-	-	-
+Pushcarts in Public-Right-of-Way	N	-	-	-	-
+Recycling Facilities: Large Collection Facility	-	-	-	-	-
+Recycling Facilities: Small Collection Facility	-	-	-	-	-
+Recycling Facilities: Large Construction & Demolition Debris Recycling Facility	-	-	-	-	-
+Recycling Facilities: Small Construction & Demolition Debris Recycling Facility	-	-	-	-	-
+Recycling Facilities: Drop-off Facility	L	L	-	-	-
+Recycling Facilities: Green Materials Composting Facility	-	-	-	-	-
+Recycling Facilities: Mixed Organic Composting Facility	-	-	-	-	-
+Recycling Facilities: Large Processing Facility Accepting at Least 98% of Total Annual Weight of Recyclables from Commercial & Industrial Traffic	-	-	-	-	-
+Recycling Facilities: Large Processing Facility Accepting All Types of Traffic	-	-	-	-	-
+Recycling Facilities: Small Processing Facility Accepting at Least 98% of Total Annual Weight of Recyclables From Commercial & Industrial Traffic	-	-	-	-	-
+Recycling Facilities: Small Processing Facility Accepting All Types of Traffic	-	-	-	-	-
+Recycling Facilities: Reverse Vending Machines	-	-	-	-	-
+Recycling Facilities: Tire Processing Facility	-	-	-	-	-
+Sidewalk Cafes	-	-	-	-	-
+Sports Arenas & Stadiums	-	-	-	-	-
+Theaters that are outdoor or over 5,000 square feet in size	P(2)	-	-	-	-
+Urgent Care Facilities	-	-	-	-	-
+Veterinary Clinics & Animal Hospitals	-	-	-	-	-
+Zoological Parks	C	-	-	-	-
+Business & Professional	-	-	-	-	-
+Government	-	-	-	-	-
+Medical, Dental, & Health Practitioner	-	-	-	-	-
+Regional & Corporate Headquarters	-	-	-	-	-
+Real Estate Sales Offices & Model Homes	-	-	-	L	-
+Sex Offender Treatment & Counseling	-	-	-	-	-
+Commercial Vehicle Repair & Maintenance	-	-	-	-	-
+Commercial Vehicle Sales & Rentals	-	-	-	-	-
+Personal Vehicle Repair & Maintenance	-	-	-	-	-
+Personal Vehicle Sales & Rentals	-	-	-	-	-
+Vehicle Equipment & Supplies Sales & Rentals	-	-	-	-	-
+Automobile Service Stations	-	-	-	-	-
+Outdoor Storage & Display of New, Unregistered Motor Vehicles as a Primary Use	-	-	-	-	-
+Vehicle Storage Facilities as a Primary Use	-	-	-	-	-
+Equipment & Materials Storage Yards	-	-	-	-	-
+Moving & Storage Facilities	-	-	-	-	-
+Distribution Facilities	-	-	-	-	-
+Junk Yards	-	-	-	-	-
+Temporary Construction Storage Yards Located Off-site	-	-	-	-	-
+Heavy Manufacturing	-	-	-	-	-
+Light Manufacturing	-	-	-	-	-
+Marine Industry	-	-	-	-	-
+Research & Development	-	-	-	-	-
+Testing Labs	-	-	-	-	-
+Trucking & Transportation Terminals	-	-	-	-	-
+Artisan Food and Beverage Producer	-	-	-	-	-
+Cannabis Production Facilities	-	-	-	-	-
+Hazardous Waste Research Facility	-	-	-	-	-
+Hazardous Waste Treatment Facility	-	-	-	-	-
+Marine Related Uses Within the Coastal Overlay Zone	-	-	-	-	-
+Mining and Extractive Industries	-	-	-	C(8)	C(7)
+Newspaper Publishing Plants	-	-	-	-	-
+Processing & Packaging of Plant Products & Animal By-	-	-	-	-	-
+Very Heavy Industrial Uses	-	-	-	-	-
+Wrecking & Dismantling of Motor Vehicles	-	-	-	-	-
+Allowable Signs	P	P	P	P	P
+Community Entry Signs	-	-	-	-	-
+Neighborhood Identification Signs	-	-	-	-	-
+Comprehensive Sign Program	-	-	-	-	-
+Revolving Projecting Signs	-	-	-	-	-
+Signs with Automatic Changing Copy	-	-	-	-	-
+Theater Marquees	-	-	-	-	-

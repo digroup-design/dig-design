@@ -1,4 +1,5 @@
-import gdal, time, os
+import time, os
+import gdal
 import simplejson as json
 
 def translate_geometry(geometry:dict, dest_format:str, dest_filename:str=None):

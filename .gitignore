@@ -2,8 +2,8 @@ venv
 .vscode
 config
 .idea
-data
-data~
+__data
+__data~
 *.csv
 
 # Byte-compiled / optimized / DLL files

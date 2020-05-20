@@ -49,7 +49,7 @@ class AddressQuery:
             "transit_priority": None, #boolean
             "opportunity_zone": None, #boolean
             "zone": None, #str
-            "zone_info": None, #dict
+            "zone_info": None, #list of dict
             "max_dwelling_units": None, #int
             "max_buildable_area": None, #float
             "assessor_map_link": None, #str (url)

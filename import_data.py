@@ -6,5 +6,5 @@ import simplejson as json
 from django.core.exceptions import ObjectDoesNotExist
 
 import database
-database._import_data("data/San Diego")
+database._import_data("__data/San Diego")
 

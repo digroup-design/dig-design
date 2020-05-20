@@ -1,8 +1,9 @@
 from reports.forms import ReportForm
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 import simplejson as json
-from calculations.AddressQueryFactory import AddressQueryFactory
+import csv
+from calculations.AddressQueryFactory import AddressQueryFactory, dict_to_csv
 
 def send_json(request, address=None, apn=None, city="san diego", state="ca"):
     #TODO: url fields should allow spaces, but do not due to URL restrictions.
@@ -15,7 +16,16 @@ def send_json(request, address=None, apn=None, city="san diego", state="ca"):
     q = AddressQueryFactory()
     data = q.get(city, state, address=address, apn=apn)
     print(q)
+
     return JsonResponse(data)
+
+def send_csv(request, address=None, apn=None, city="san diego", state="ca"):
+    """Creates a CSV response (as opposed to json)"""
+    data = json.loads(send_json(request, address, apn, city, state).content)
+    print(data)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="cover_sheet.csv"'
+    return dict_to_csv(data, response)
 
 def home(request):
     template = 'reports/home.html'

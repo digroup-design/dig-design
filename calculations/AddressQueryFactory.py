@@ -1,9 +1,8 @@
 from time import time
-import calculations.Vector as Vector
 from calculations.San_Diego.SanDiego import SanDiego
 from calculations.Santa_Clara_County.SantaClara_County import SantaClara_County
 from calculations.San_Jose.SanJose import SanJose
-
+import csv
 """This module implements a Factory Pattern class to handle all instances of the many AddressQuery subclasses"""
 
 def _init_street_sfx_dict(filename="calculations/street_sfx.csv"):
@@ -33,6 +32,32 @@ def _format_apn(apn_entry):
     """Strips all non-alphanumeric character for a string. Used to format APN texts."""
     return ''.join([c for c in str(apn_entry) if c.isalnum()])
 
+def dict_to_csv(data:dict, csv_file, delimiter=","):
+    """Creates a CSV for Revit dynamo script from queried data dict"""
+    for k in data:
+        if data[k] is None: data[k] = "-"
+
+    writer = csv.writer(csv_file, delimiter=delimiter)
+    entries = (
+        ("Project Address", data["street_address"]),
+        ("Project City", data["city"] + ', ' + data["state"] + ' ' + data["zip"]),
+        ("APN", data["apn"]),
+        ("Zone", data["zone"]),
+        ("Lot Area", data["lot_area"])
+    )
+    for e in entries:
+        writer.writerow((e[0], '-' if e[1] is None else e[1]))
+
+    try:
+        if data["zone_info"][0].__class__ is dict:
+            zone_info = data["zone_info"][0]["dev_regulations"]
+            for k, v in zone_info.items():
+                if v.__class__ is dict and 'rule' in v.keys():
+                    writer.writerow((k, v['rule']))
+    except (IndexError, AttributeError, KeyError) as e:
+         pass #zone info not available
+    return csv_file
+
 class AddressQueryFactory:
     queries = ( #Update this as more AddressQuery classes are created
         (("ca", "california"), (SanJose, SanDiego, SantaClara_County)),
@@ -40,7 +65,7 @@ class AddressQueryFactory:
 
     def __init__(self, max_cache=120):
         """AddressQueueFactory will log data from address_queries. This is mainly intended for backend testing."""
-        if type(max_cache) not in [int, float]:
+        if type(max_cache) not in (int, float):
             raise TypeError("max_cache must be an integer at least 1")
         if max_cache < 1:
             raise ValueError("max_cache must be an integer at least 1")
@@ -84,7 +109,7 @@ class AddressQueryFactory:
             self._update_log('{1} query for "{2}" in {0} s'.format(str(end_time - start_time),
                                                                    "Address" if address else "APN",
                                                                    address if address else apn), data)
-        data["dxf"] = Vector.translate_geometry(data["geometry"], "DXF")
+        #data["dxf"] = Vector.translate_geometry(data["geometry"], "DXF")
         return data
 
     def __str__(self):
