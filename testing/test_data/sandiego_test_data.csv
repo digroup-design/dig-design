@@ -1,0 +1,6 @@
+query;apn;zone;city_zip;lot_area;max_dwelling_units;base_dwelling_units;transit_priority
+3235 marlton dr;5391901300;RS-1-7;San Diego, CA 92104;4527;1;1;False
+4442 ocean view blvd;5476213600;RM-2-5;San Diego, CA 92113;21687;30;15;True
+4544 pocahontas ave;3594102400;RM-1-1;San Diego, CA 92117;44431;30;15;True
+2405 union st;5330630700;RM-3-7;San Diego, CA 92101;4630;10;5;True
+3901 clairemont dr;;CN-1-2;;16664;24;12;True
